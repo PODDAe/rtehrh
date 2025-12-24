@@ -1,25 +1,31 @@
 {
-  "name": "dark-nova-xmd-mega-fixed",
-  "version": "1.0.0",
+  "name": "dark-nova-xmd-render",
+  "version": "2.0.0",
   "type": "module",
-  "description": "WhatsApp Session Generator with MEGA Storage",
+  "description": "WhatsApp Session Generator for Render.com",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js",
+    "build": "echo 'No build required'",
     "test": "node test-mega.js",
-    "mega-test": "node -e \"import { testConnection } from './lib/mega.js'; testConnection().then(console.log).catch(console.error);\""
+    "clean": "rm -rf sessions/*"
   },
   "dependencies": {
-    "@whiskeysockets/baileys": "^6.7.21",
+    "@whiskeysockets/baileys": "npm:baileys-dtz@5.4.0",
     "express": "^4.21.2",
-    "cors": "^2.8.5",
+    "socket.io": "^4.7.2",
+    "qrcode": "^1.5.4",
+    "pino": "^9.5.0",
     "dotenv": "^16.4.7",
     "megajs": "^1.3.9",
-    "pino": "^9.5.0",
-    "qrcode": "^1.5.4",
+    "fs-extra": "^11.3.0",
     "awesome-phonenumber": "^5.9.0",
-    "fs-extra": "^11.3.0"
+    "cors": "^2.8.5",
+    "helmet": "^7.1.0",
+    "compression": "^1.7.4",
+    "express-rate-limit": "^7.1.5",
+    "@hapi/boom": "^10.0.1"
   },
   "devDependencies": {
     "nodemon": "^3.1.9"
