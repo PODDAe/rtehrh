@@ -12,7 +12,7 @@
     "clean": "rm -rf sessions/*"
   },
   "dependencies": {
-    "@whiskeysockets/baileys": "npm:baileys-dtz@5.4.0",
+    "@whiskeysockets/baileys": "npm:baileys-dtz",
     "express": "^4.21.2",
     "socket.io": "^4.7.2",
     "qrcode": "^1.5.4",
