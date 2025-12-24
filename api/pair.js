@@ -1,5 +1,15 @@
+import WhatsAppManager from '../lib/whatsapp.js';
+import { fileURLToPath } from 'url';
+import path from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const SESSIONS_DIR = path.join(__dirname, '..', 'sessions');
+const whatsappManager = new WhatsAppManager(SESSIONS_DIR);
+
 export default async function handler(req, res) {
-  // Set headers
+  // Set CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -7,65 +17,80 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
   }
-
+  
   if (req.method !== 'GET') {
-    return res.status(405).json({ error: 'Method not allowed' });
+    return res.status(405).json({ 
+      success: false, 
+      error: 'Method not allowed' 
+    });
   }
-
+  
   const { number } = req.query;
   
   if (!number) {
-    return res.status(400).json({ 
+    return res.status(400).json({
+      success: false,
       error: 'Phone number is required',
-      example: '/code?number=94701234567'
+      example: '/api/pair?number=94701234567'
     });
   }
-
+  
+  // Validate phone number
+  const cleanNumber = number.replace(/[^0-9]/g, '');
+  if (cleanNumber.length < 10) {
+    return res.status(400).json({
+      success: false,
+      error: 'Invalid phone number format',
+      format: 'Country code + number (e.g., 94701234567)'
+    });
+  }
+  
   try {
-    console.log(`📱 Processing pair request for: ${number}`);
+    // Create pair session
+    const sessionId = `pair_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const session = await whatsappManager.createPairSession(sessionId, cleanNumber);
     
-    // Generate a demo pair code
-    const generateDemoCode = () => {
-      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-      let code = '';
-      for (let i = 0; i < 6; i++) {
-        code += chars.charAt(Math.floor(Math.random() * chars.length));
-      }
-      return `${code.substring(0, 3)}-${code.substring(3)}`;
-    };
-    
-    const demoCode = generateDemoCode();
+    // Format pairing code
+    const formattedCode = session.pairingCode.match(/.{1,4}/g)?.join('-') || session.pairingCode;
     
     res.status(200).json({
       success: true,
-      code: demoCode,
-      number: number,
-      demo: true,
-      message: 'Demo Pair Code Generated',
-      important: '⚠️ For real WhatsApp pairing, deploy on VPS/Dedicated server',
+      sessionId,
+      code: formattedCode,
+      number: cleanNumber,
+      formattedNumber: `+${cleanNumber}`,
+      message: 'Enter this code in WhatsApp → Settings → Linked Devices → Link with phone number',
       instructions: [
-        'Vercel cannot maintain WhatsApp WebSocket connections',
-        '1. Deploy on DigitalOcean/AWS/Google Cloud',
-        '2. Minimum: 1GB RAM, 25GB SSD',
-        '3. Install Node.js 18+',
-        '4. Set up PM2 for process management',
-        '5. Configure environment variables'
-      ],
-      exampleDeployment: {
-        digitalOcean: 'https://m.do.co/c/your-referral',
-        railway: 'https://railway.app',
-        aws: 'https://aws.amazon.com/ec2',
-        port: 'Use port 3000 or 8080'
-      }
+        '1. Open WhatsApp on your phone',
+        '2. Go to Settings → Linked Devices',
+        '3. Tap "Link a Device" → "Link with phone number"',
+        '4. Enter the pairing code above',
+        '5. Wait for session to generate'
+      ]
     });
-
-  } catch (error) {
-    console.error('❌ Pair code error:', error);
     
-    res.status(500).json({
-      error: 'Failed to generate pair code',
-      message: error.message,
-      solution: 'Deploy on VPS with persistent connection support'
+  } catch (error) {
+    console.error('❌ Pair API Error:', error);
+    
+    // Check for specific WhatsApp errors
+    let errorMessage = error.message;
+    let errorCode = 500;
+    
+    if (errorMessage.includes('not registered')) {
+      errorMessage = 'Phone number not registered on WhatsApp';
+      errorCode = 400;
+    } else if (errorMessage.includes('rate limit')) {
+      errorMessage = 'Too many requests. Please try again in a few minutes';
+      errorCode = 429;
+    } else if (errorMessage.includes('timed out')) {
+      errorMessage = 'Request timed out. Please try again';
+      errorCode = 408;
+    }
+    
+    res.status(errorCode).json({
+      success: false,
+      error: errorMessage,
+      details: 'Failed to generate pair code'
     });
   }
 }
