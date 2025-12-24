@@ -1,1 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DARK NOVA XMD | Session Generator</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #ff003c;
+            --secondary: #00d9ff;
+            --dark: #0a0a0f;
+            --darker: #050508;
+            --light: #f0f0f5;
+            --card-bg: rgba(20, 20, 30, 0.95);
+            --neon-glow: 0 0 20px var(--primary);
+        }
 
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--darker) 0%, var(--dark) 100%);
+            color: var(--light);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 3s infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .logo {
+            font-size: 4rem;
+            font-weight: 900;
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: var(--neon-glow);
+            margin-bottom: 1rem;
+            letter-spacing: 3px;
+        }
+
+        .tagline {
+            color: #aaa;
+            font-size: 1.2rem;
+            letter-spacing: 2px;
+            margin-bottom: 2rem;
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .feature-card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 2rem;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--primary);
+            box-shadow: var(--neon-glow);
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            color: var(--secondary);
+            margin-bottom: 1rem;
+        }
+
+        .feature-title {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--light);
+        }
+
+        .feature-desc {
+            color: #ccc;
+            line-height: 1.6;
+        }
+
+        .methods {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .method-btn {
+            background: linear-gradient(45deg, var(--primary), #ff2b6b);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            padding: 1.5rem;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            text-decoration: none;
+        }
+
+        .method-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(255, 0, 60, 0.3);
+        }
+
+        .method-btn.qr {
+            background: linear-gradient(45deg, #00d9ff, #0099ff);
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .footer-link {
+            color: #aaa;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-link:hover {
+            color: var(--secondary);
+        }
+
+        .copyright {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .logo {
+                font-size: 2.5rem;
+            }
+            
+            .methods {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="stars" id="stars"></div>
+    
+    <div class="container">
+        <header>
+            <h1 class="logo">DARK NOVA XMD</h1>
+            <p class="tagline">⚡ Premium WhatsApp Session Generator ⚡</p>
+        </header>
+
+        <div class="features">
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <h3 class="feature-title">Secure Sessions</h3>
+                <p class="feature-desc">Encrypted session storage with MEGA cloud security. Your data stays protected.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-bolt"></i>
+                </div>
+                <h3 class="feature-title">Lightning Fast</h3>
+                <p class="feature-desc">Generate sessions in seconds with our optimized pairing technology.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-sync-alt"></i>
+                </div>
+                <h3 class="feature-title">Multi-Device</h3>
+                <p class="feature-desc">Supports WhatsApp Multi-Device protocol for seamless connectivity.</p>
+            </div>
+        </div>
+
+        <div class="methods">
+            <a href="/qrpage" class="method-btn qr">
+                <i class="fas fa-qrcode"></i>
+                QR Code Method
+            </a>
+            
+            <a href="/pairpage" class="method-btn">
+                <i class="fas fa-mobile-alt"></i>
+                Pair Code Method
+            </a>
+        </div>
+
+        <footer>
+            <div class="footer-links">
+                <a href="https://github.com/dula9x/DARK-NOVA-XMD" class="footer-link" target="_blank">
+                    <i class="fab fa-github"></i> GitHub
+                </a>
+                <a href="https://whatsapp.com/channel/0029Vb9yA9K9sBI799oc7U2T" class="footer-link" target="_blank">
+                    <i class="fab fa-whatsapp"></i> WhatsApp
+                </a>
+                <a href="https://t.me/DARKNOVAXMD" class="footer-link" target="_blank">
+                    <i class="fab fa-telegram"></i> Telegram
+                </a>
+            </div>
+            <p class="copyright">
+                © 2024 DARK NOVA XMD | Created by Dulina Nethmira & Sheron Elijah<br>
+                Powered by WHITE ALPHA WOLF X TEAM
+            </p>
+        </footer>
+    </div>
+
+    <script>
+        // Create stars background
+        function createStars() {
+            const stars = document.getElementById('stars');
+            for (let i = 0; i < 100; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.width = Math.random() * 3 + 'px';
+                star.style.height = star.style.width;
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.animationDelay = Math.random() * 3 + 's';
+                star.style.opacity = Math.random() * 0.5 + 0.3;
+                stars.appendChild(star);
+            }
+        }
+
+        createStars();
+    </script>
+</body>
+</html>
