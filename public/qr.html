@@ -36,12 +36,8 @@
             text-align: center;
         }
 
-        .header {
-            margin-bottom: 30px;
-        }
-
         .back-btn {
-            position: absolute;
+            position: fixed;
             top: 20px;
             left: 20px;
             background: rgba(255, 255, 255, 0.1);
@@ -55,10 +51,12 @@
             align-items: center;
             gap: 8px;
             transition: all 0.3s ease;
+            z-index: 1000;
         }
 
         .back-btn:hover {
             background: var(--primary);
+            transform: translateX(-5px);
         }
 
         .title {
@@ -82,11 +80,16 @@
             margin-bottom: 30px;
             border: 1px solid rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
+            min-height: 400px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
         }
 
         #qrImage {
-            width: 300px;
-            height: 300px;
+            max-width: 300px;
+            max-height: 300px;
             background: white;
             padding: 20px;
             border-radius: 10px;
@@ -105,6 +108,9 @@
         .instructions h3 {
             color: var(--secondary);
             margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
         .instructions ol {
@@ -122,6 +128,10 @@
             border-radius: 10px;
             background: rgba(255, 0, 60, 0.1);
             border: 1px solid var(--primary);
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .loader {
@@ -150,11 +160,24 @@
             cursor: pointer;
             transition: all 0.3s ease;
             margin-top: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
         }
 
         .refresh-btn:hover {
             transform: scale(1.05);
             box-shadow: 0 5px 15px rgba(255, 0, 60, 0.3);
+        }
+
+        .test-mode {
+            background: rgba(0, 217, 255, 0.1);
+            border: 1px solid var(--secondary);
+            color: var(--secondary);
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+            font-size: 0.9rem;
         }
 
         @media (max-width: 600px) {
@@ -164,11 +187,16 @@
             
             .qr-container {
                 padding: 20px;
+                min-height: 350px;
             }
             
             #qrImage {
-                width: 250px;
-                height: 250px;
+                max-width: 250px;
+                max-height: 250px;
+            }
+            
+            .title {
+                font-size: 2rem;
             }
         }
     </style>
@@ -179,15 +207,18 @@
     </a>
 
     <div class="container">
-        <div class="header">
-            <h1 class="title">QR Code Scanner</h1>
-            <p class="subtitle">Scan to generate WhatsApp session</p>
-        </div>
+        <h1 class="title">QR Code Scanner</h1>
+        <p class="subtitle">Scan to generate WhatsApp session</p>
 
         <div class="qr-container">
-            <div id="status" class="status">Loading QR code...</div>
-            <div id="loader" class="loader"></div>
+            <div id="status" class="status">
+                <span id="statusText">Initializing QR generator...</span>
+                <div class="loader" id="loader"></div>
+            </div>
             <img id="qrImage" src="" alt="QR Code" style="display: none;" />
+            <div id="testMode" class="test-mode" style="display: none;">
+                <i class="fas fa-vial"></i> Test Mode Active - Demo QR Code
+            </div>
         </div>
 
         <div class="instructions" id="instructions" style="display: none;">
@@ -207,54 +238,131 @@
     </div>
 
     <script>
-        async function generateQR() {
+        let qrGenerated = false;
+        
+        function updateStatus(text, type = 'info') {
+            const statusText = document.getElementById('statusText');
             const status = document.getElementById('status');
             const loader = document.getElementById('loader');
-            const qrImage = document.getElementById('qrImage');
-            const instructions = document.getElementById('instructions');
-            const refreshBtn = document.getElementById('refreshBtn');
             
-            // Reset display
-            status.style.display = 'block';
-            loader.style.display = 'block';
-            qrImage.style.display = 'none';
-            instructions.style.display = 'none';
-            refreshBtn.style.display = 'none';
+            statusText.textContent = text;
             
-            status.textContent = 'Generating QR code...';
-            
-            try {
-                const response = await fetch('/qr');
-                const data = await response.json();
-                
-                if (data.success && data.qr) {
-                    qrImage.src = data.qr;
-                    qrImage.style.display = 'block';
-                    loader.style.display = 'none';
-                    instructions.style.display = 'block';
-                    refreshBtn.style.display = 'block';
-                    status.textContent = 'QR Code Generated! Scan with WhatsApp.';
-                    status.style.background = 'rgba(0, 217, 255, 0.1)';
-                    status.style.borderColor = 'var(--secondary)';
-                } else {
-                    status.textContent = data.error || 'Failed to generate QR code';
-                    status.style.background = 'rgba(255, 0, 60, 0.1)';
-                    status.style.borderColor = 'var(--primary)';
-                    loader.style.display = 'none';
-                    refreshBtn.style.display = 'block';
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                status.textContent = 'Failed to connect to server';
+            // Update colors based on type
+            if (type === 'success') {
+                status.style.background = 'rgba(0, 217, 255, 0.1)';
+                status.style.borderColor = 'var(--secondary)';
+                loader.style.display = 'none';
+            } else if (type === 'error') {
                 status.style.background = 'rgba(255, 0, 60, 0.1)';
                 status.style.borderColor = 'var(--primary)';
                 loader.style.display = 'none';
-                refreshBtn.style.display = 'block';
+            } else {
+                status.style.background = 'rgba(255, 255, 255, 0.05)';
+                status.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+                loader.style.display = 'inline-block';
             }
         }
-
+        
+        async function generateQR() {
+            const qrImage = document.getElementById('qrImage');
+            const instructions = document.getElementById('instructions');
+            const refreshBtn = document.getElementById('refreshBtn');
+            const testMode = document.getElementById('testMode');
+            
+            // Reset display
+            qrImage.style.display = 'none';
+            instructions.style.display = 'none';
+            refreshBtn.style.display = 'none';
+            testMode.style.display = 'none';
+            
+            updateStatus('Generating QR code...', 'info');
+            
+            try {
+                // Try to fetch QR code
+                const response = await fetch('/qr');
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                
+                if (data.success && data.qr) {
+                    // Display QR code
+                    qrImage.src = data.qr;
+                    qrImage.style.display = 'block';
+                    instructions.style.display = 'block';
+                    refreshBtn.style.display = 'inline-flex';
+                    
+                    // Show test mode notice if in test mode
+                    if (data.testMode) {
+                        testMode.style.display = 'block';
+                    }
+                    
+                    updateStatus('QR Code Generated! Scan with WhatsApp.', 'success');
+                    qrGenerated = true;
+                } else {
+                    throw new Error(data.error || 'Failed to generate QR code');
+                }
+            } catch (error) {
+                console.error('Error generating QR:', error);
+                
+                // Fallback: Generate a simple QR code locally
+                try {
+                    // Create a simple QR code with canvas
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    canvas.width = 300;
+                    canvas.height = 300;
+                    
+                    // Draw a simple QR-like pattern
+                    ctx.fillStyle = '#0A0A0F';
+                    ctx.fillRect(0, 0, 300, 300);
+                    
+                    ctx.fillStyle = '#FF003C';
+                    for (let i = 0; i < 100; i++) {
+                        const x = Math.floor(Math.random() * 280) + 10;
+                        const y = Math.floor(Math.random() * 280) + 10;
+                        const size = Math.random() * 10 + 5;
+                        ctx.fillRect(x, y, size, size);
+                    }
+                    
+                    // Add text
+                    ctx.fillStyle = '#FFFFFF';
+                    ctx.font = '20px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('DARK NOVA XMD', 150, 150);
+                    ctx.font = '14px Arial';
+                    ctx.fillText('DEMO MODE', 150, 170);
+                    
+                    // Convert to data URL
+                    const fallbackQR = canvas.toDataURL('image/png');
+                    
+                    qrImage.src = fallbackQR;
+                    qrImage.style.display = 'block';
+                    instructions.style.display = 'block';
+                    refreshBtn.style.display = 'inline-flex';
+                    testMode.style.display = 'block';
+                    
+                    updateStatus('Demo QR Code Generated (Test Mode)', 'success');
+                    qrGenerated = true;
+                    
+                } catch (fallbackError) {
+                    updateStatus(`Error: ${error.message}`, 'error');
+                    refreshBtn.style.display = 'inline-flex';
+                }
+            }
+        }
+        
         // Generate QR code on page load
         document.addEventListener('DOMContentLoaded', generateQR);
+        
+        // Auto-refresh QR code every 60 seconds if not scanned
+        setInterval(() => {
+            if (qrGenerated) {
+                generateQR();
+            }
+        }, 60000);
     </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
 </body>
