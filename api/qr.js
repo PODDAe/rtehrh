@@ -1,8 +1,16 @@
 import QRCode from 'qrcode';
-import { Boom } from '@hapi/boom';
+import WhatsAppManager from '../lib/whatsapp.js';
+import { fileURLToPath } from 'url';
+import path from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const SESSIONS_DIR = path.join(__dirname, '..', 'sessions');
+const whatsappManager = new WhatsAppManager(SESSIONS_DIR);
 
 export default async function handler(req, res) {
-  // Set headers
+  // Set CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -10,32 +18,45 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
   }
-
+  
   if (req.method !== 'GET') {
-    return res.status(405).json({ error: 'Method not allowed' });
+    return res.status(405).json({ 
+      success: false, 
+      error: 'Method not allowed' 
+    });
   }
-
+  
   try {
-    console.log('🔄 Generating QR code...');
+    // Create new session
+    const sessionId = `qr_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const session = await whatsappManager.createSession(sessionId);
     
-    // Generate a unique session ID
-    const sessionId = `DARKNOVA-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    // Wait for QR code (max 30 seconds)
+    let qrCode = null;
+    const startTime = Date.now();
+    const timeout = 30000; // 30 seconds
     
-    // Create a QR code with connection instructions
-    const qrData = {
-      type: 'whatsapp_session',
-      sessionId: sessionId,
-      timestamp: Date.now(),
-      app: 'DARK-NOVA-XMD',
-      version: '1.0.0',
-      // For testing, we'll use a simple approach
-      instructions: 'This is a demo QR. For real connection, use dedicated hosting.'
-    };
+    while (!qrCode && Date.now() - startTime < timeout) {
+      const currentSession = whatsappManager.getSession(sessionId);
+      if (currentSession && currentSession.qr) {
+        qrCode = currentSession.qr;
+        break;
+      }
+      
+      // Wait 500ms before checking again
+      await new Promise(resolve => setTimeout(resolve, 500));
+    }
     
-    const qrString = JSON.stringify(qrData);
+    if (!qrCode) {
+      await whatsappManager.removeSession(sessionId);
+      return res.status(408).json({
+        success: false,
+        error: 'QR code generation timeout'
+      });
+    }
     
-    // Generate QR code
-    const qrDataUrl = await QRCode.toDataURL(qrString, {
+    // Generate QR code image
+    const qrImage = await QRCode.toDataURL(qrCode, {
       errorCorrectionLevel: 'H',
       margin: 2,
       width: 300,
@@ -44,58 +65,28 @@ export default async function handler(req, res) {
         light: '#0A0A0F'
       }
     });
-
-    console.log('✅ QR code generated');
     
-    // For Vercel deployment, we'll provide instructions
-    // instead of actual WhatsApp connection
     res.status(200).json({
       success: true,
-      qr: qrDataUrl,
       sessionId,
-      message: 'QR Code Generated',
-      note: 'For real WhatsApp connection, deploy on VPS/Dedicated server',
+      qr: qrImage,
+      message: 'Scan QR code with WhatsApp to generate session',
       instructions: [
-        '⚠️ Vercel Limitation: WhatsApp WebSocket connections require persistent servers',
-        '1. Clone this project to a VPS (DigitalOcean, AWS, Railway)',
-        '2. Install dependencies: npm install',
-        '3. Set MEGA credentials in .env file',
-        '4. Run: npm start',
-        '5. Access your server IP:3000 for full functionality'
-      ],
-      deployment: {
-        recommended: 'VPS/Dedicated Server',
-        alternatives: ['Railway.app', 'DigitalOcean Droplet', 'AWS EC2', 'Google Cloud Run'],
-        notRecommended: 'Vercel/Netlify (Serverless)'
-      }
+        '1. Open WhatsApp on your phone',
+        '2. Tap Settings → Linked Devices',
+        '3. Tap "Link a Device"',
+        '4. Scan the QR code above',
+        '5. Wait for session to generate'
+      ]
     });
-
-  } catch (error) {
-    console.error('❌ QR generation error:', error);
     
-    // Fallback: Generate a simple QR code
-    try {
-      const fallbackQR = await QRCode.toDataURL(`DARKNOVA-FALLBACK-${Date.now()}`, {
-        width: 300,
-        color: {
-          dark: '#000000',
-          light: '#FFFFFF'
-        }
-      });
-      
-      res.status(200).json({
-        success: true,
-        qr: fallbackQR,
-        fallback: true,
-        message: 'Demo QR Code (Fallback Mode)',
-        warning: 'WhatsApp connection requires dedicated server hosting'
-      });
-    } catch (fallbackError) {
-      res.status(500).json({
-        error: 'Failed to generate QR code',
-        message: fallbackError.message,
-        solution: 'Deploy on VPS for WhatsApp functionality'
-      });
-    }
+  } catch (error) {
+    console.error('❌ QR API Error:', error);
+    
+    res.status(500).json({
+      success: false,
+      error: error.message,
+      details: 'Failed to generate QR code'
+    });
   }
 }
