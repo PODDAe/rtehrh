@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DARK NOVA XMD | Session Generator</title>
+    <title>DARK NOVA XMD | WhatsApp Session Generator</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
@@ -11,7 +11,7 @@
             --secondary: #00d9ff;
             --dark: #0a0a0f;
             --darker: #050508;
-            --light: #f0f0f5;
+            --light: #ffffff;
             --card-bg: rgba(20, 20, 30, 0.95);
             --neon-glow: 0 0 20px var(--primary);
         }
@@ -27,262 +27,427 @@
             background: linear-gradient(135deg, var(--darker) 0%, var(--dark) 100%);
             color: var(--light);
             min-height: 100vh;
+            padding: 20px;
             overflow-x: hidden;
-        }
-
-        .stars {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: -1;
-        }
-
-        .star {
-            position: absolute;
-            background: white;
-            border-radius: 50%;
-            animation: twinkle 3s infinite;
-        }
-
-        @keyframes twinkle {
-            0%, 100% { opacity: 0.3; }
-            50% { opacity: 1; }
         }
 
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 2rem;
+            padding: 20px;
         }
 
-        header {
+        .header {
             text-align: center;
-            margin-bottom: 3rem;
+            margin-bottom: 40px;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--primary), transparent);
+            animation: slide 3s infinite;
+        }
+
+        @keyframes slide {
+            0% { left: -100%; }
+            100% { left: 100%; }
         }
 
         .logo {
-            font-size: 4rem;
+            font-size: 3.5rem;
             font-weight: 900;
             background: linear-gradient(45deg, var(--primary), var(--secondary));
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
             text-shadow: var(--neon-glow);
-            margin-bottom: 1rem;
+            margin-bottom: 10px;
             letter-spacing: 3px;
         }
 
         .tagline {
             color: #aaa;
             font-size: 1.2rem;
+            margin-bottom: 20px;
             letter-spacing: 2px;
-            margin-bottom: 2rem;
         }
 
-        .features {
+        .deployment-badge {
+            display: inline-block;
+            background: #46b6ac;
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+        .methods-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-            margin-bottom: 3rem;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
         }
 
-        .feature-card {
+        .method-card {
             background: var(--card-bg);
             border-radius: 20px;
-            padding: 2rem;
-            text-align: center;
+            padding: 30px;
             border: 1px solid rgba(255, 255, 255, 0.1);
             transition: all 0.3s ease;
+            text-align: center;
             backdrop-filter: blur(10px);
+            cursor: pointer;
         }
 
-        .feature-card:hover {
+        .method-card:hover {
             transform: translateY(-10px);
             border-color: var(--primary);
             box-shadow: var(--neon-glow);
         }
 
-        .feature-icon {
+        .method-icon {
             font-size: 3rem;
             color: var(--secondary);
-            margin-bottom: 1rem;
+            margin-bottom: 20px;
         }
 
-        .feature-title {
-            font-size: 1.5rem;
-            margin-bottom: 1rem;
+        .method-title {
+            font-size: 1.8rem;
+            margin-bottom: 15px;
             color: var(--light);
         }
 
-        .feature-desc {
+        .method-desc {
             color: #ccc;
             line-height: 1.6;
+            margin-bottom: 25px;
         }
 
-        .methods {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 2rem;
-            margin-bottom: 3rem;
-        }
-
-        .method-btn {
+        .btn {
+            display: inline-block;
             background: linear-gradient(45deg, var(--primary), #ff2b6b);
             color: white;
-            border: none;
-            border-radius: 15px;
-            padding: 1.5rem;
-            font-size: 1.2rem;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 1rem;
+            padding: 15px 30px;
+            border-radius: 10px;
             text-decoration: none;
+            font-weight: bold;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
         }
 
-        .method-btn:hover {
+        .btn::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transform: rotate(45deg);
+            transition: all 0.5s ease;
+        }
+
+        .btn:hover::after {
+            left: 100%;
+        }
+
+        .btn:hover {
             transform: scale(1.05);
-            box-shadow: 0 10px 30px rgba(255, 0, 60, 0.3);
+            box-shadow: 0 10px 20px rgba(255, 0, 60, 0.3);
         }
 
-        .method-btn.qr {
+        .btn.qr {
             background: linear-gradient(45deg, #00d9ff, #0099ff);
         }
 
+        .status-panel {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 30px;
+            border-left: 4px solid var(--primary);
+        }
+
+        .status-title {
+            color: var(--secondary);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .status-item {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .status-label {
+            color: #aaa;
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+        }
+
+        .status-value {
+            color: var(--light);
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .online {
+            color: #00ff88 !important;
+        }
+
+        .offline {
+            color: #ff4444 !important;
+        }
+
+        .warning {
+            color: #ffaa00 !important;
+        }
+
         footer {
+            margin-top: 50px;
             text-align: center;
-            margin-top: 3rem;
-            padding-top: 2rem;
+            color: #666;
+            font-size: 0.9rem;
+            padding-top: 20px;
             border-top: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .footer-links {
+            margin-bottom: 15px;
             display: flex;
             justify-content: center;
-            gap: 2rem;
-            margin-bottom: 1rem;
+            gap: 20px;
+            flex-wrap: wrap;
         }
 
-        .footer-link {
+        .footer-links a {
             color: #aaa;
             text-decoration: none;
-            transition: color 0.3s ease;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
-        .footer-link:hover {
+        .footer-links a:hover {
             color: var(--secondary);
+            transform: translateY(-2px);
         }
 
-        .copyright {
-            color: #666;
+        .music-indicator {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.5);
+            color: var(--secondary);
+            padding: 10px 15px;
+            border-radius: 10px;
             font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border: 1px solid rgba(0, 217, 255, 0.3);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 1; }
         }
 
         @media (max-width: 768px) {
-            .container {
-                padding: 1rem;
+            .methods-grid {
+                grid-template-columns: 1fr;
             }
             
             .logo {
                 font-size: 2.5rem;
             }
             
-            .methods {
+            .method-card {
+                padding: 20px;
+            }
+            
+            .status-grid {
                 grid-template-columns: 1fr;
+            }
+            
+            .music-indicator {
+                bottom: 10px;
+                right: 10px;
+                left: 10px;
+                text-align: center;
+                justify-content: center;
             }
         }
     </style>
 </head>
 <body>
-    <div class="stars" id="stars"></div>
-    
+    <!-- Background Music (Hidden) -->
+    <audio id="bgMusic" loop style="display: none;">
+        <source src="https://files.catbox.moe/qzpwzj.mp3" type="audio/mpeg">
+    </audio>
+
+    <!-- Music Indicator -->
+    <div class="music-indicator" id="musicIndicator">
+        <i class="fas fa-music"></i>
+        <span>Background Music Playing</span>
+    </div>
+
     <div class="container">
-        <header>
+        <div class="header">
             <h1 class="logo">DARK NOVA XMD</h1>
-            <p class="tagline">⚡ Premium WhatsApp Session Generator ⚡</p>
-        </header>
-
-        <div class="features">
-            <div class="feature-card">
-                <div class="feature-icon">
-                    <i class="fas fa-shield-alt"></i>
-                </div>
-                <h3 class="feature-title">Secure Sessions</h3>
-                <p class="feature-desc">Encrypted session storage with MEGA cloud security. Your data stays protected.</p>
-            </div>
-
-            <div class="feature-card">
-                <div class="feature-icon">
-                    <i class="fas fa-bolt"></i>
-                </div>
-                <h3 class="feature-title">Lightning Fast</h3>
-                <p class="feature-desc">Generate sessions in seconds with our optimized pairing technology.</p>
-            </div>
-
-            <div class="feature-card">
-                <div class="feature-icon">
-                    <i class="fas fa-sync-alt"></i>
-                </div>
-                <h3 class="feature-title">Multi-Device</h3>
-                <p class="feature-desc">Supports WhatsApp Multi-Device protocol for seamless connectivity.</p>
+            <p class="tagline">⚡ WhatsApp Session Generator ⚡</p>
+            <div class="deployment-badge">
+                <i class="fas fa-server"></i> Powered by Render.com
             </div>
         </div>
 
-        <div class="methods">
-            <a href="/qrpage" class="method-btn qr">
-                <i class="fas fa-qrcode"></i>
-                QR Code Method
-            </a>
-            
-            <a href="/pairpage" class="method-btn">
-                <i class="fas fa-mobile-alt"></i>
-                Pair Code Method
-            </a>
+        <div class="methods-grid">
+            <div class="method-card" onclick="window.location.href='/qr'">
+                <div class="method-icon">
+                    <i class="fas fa-qrcode"></i>
+                </div>
+                <h3 class="method-title">QR Code Method</h3>
+                <p class="method-desc">Scan QR code with WhatsApp to generate session instantly. Perfect for quick setup and multiple device connections.</p>
+                <a href="/qr" class="btn qr">
+                    <i class="fas fa-qrcode"></i> Generate QR Code
+                </a>
+            </div>
+
+            <div class="method-card" onclick="window.location.href='/pair'">
+                <div class="method-icon">
+                    <i class="fas fa-mobile-alt"></i>
+                </div>
+                <h3 class="method-title">Pair Code Method</h3>
+                <p class="method-desc">Enter your phone number to receive a pairing code. Works with WhatsApp Multi-Device and remote connections.</p>
+                <a href="/pair" class="btn">
+                    <i class="fas fa-key"></i> Generate Pair Code
+                </a>
+            </div>
+        </div>
+
+        <div class="status-panel">
+            <h3 class="status-title">
+                <i class="fas fa-chart-line"></i> System Status
+            </h3>
+            <div class="status-grid">
+                <div class="status-item">
+                    <div class="status-label">Server Status</div>
+                    <div class="status-value online" id="serverStatus">Checking...</div>
+                </div>
+                <div class="status-item">
+                    <div class="status-label">WhatsApp API</div>
+                    <div class="status-value online" id="whatsappStatus">Ready</div>
+                </div>
+                <div class="status-item">
+                    <div class="status-label">MEGA Storage</div>
+                    <div class="status-value" id="megaStatus">Checking...</div>
+                </div>
+                <div class="status-item">
+                    <div class="status-label">Active Sessions</div>
+                    <div class="status-value" id="sessionCount">0</div>
+                </div>
+            </div>
         </div>
 
         <footer>
             <div class="footer-links">
-                <a href="https://github.com/dula9x/DARK-NOVA-XMD" class="footer-link" target="_blank">
+                <a href="https://github.com/dula9x/DARK-NOVA-XMD" target="_blank">
                     <i class="fab fa-github"></i> GitHub
                 </a>
-                <a href="https://whatsapp.com/channel/0029Vb9yA9K9sBI799oc7U2T" class="footer-link" target="_blank">
-                    <i class="fab fa-whatsapp"></i> WhatsApp
+                <a href="https://whatsapp.com/channel/0029Vb9yA9K9sBI799oc7U2T" target="_blank">
+                    <i class="fab fa-whatsapp"></i> WhatsApp Channel
                 </a>
-                <a href="https://t.me/DARKNOVAXMD" class="footer-link" target="_blank">
-                    <i class="fab fa-telegram"></i> Telegram
+                <a href="https://render.com" target="_blank">
+                    <i class="fas fa-cloud"></i> Render.com
+                </a>
+                <a href="/api/health" target="_blank">
+                    <i class="fas fa-heartbeat"></i> Health Check
                 </a>
             </div>
-            <p class="copyright">
-                © 2024 DARK NOVA XMD | Created by Dulina Nethmira & Sheron Elijah<br>
-                Powered by WHITE ALPHA WOLF X TEAM
-            </p>
+            <p>© 2024 DARK NOVA XMD | Created by Dulina Nethmira</p>
+            <p>Powered by DTZ TEAM</p>
         </footer>
     </div>
 
+    <script src="/js/music.js"></script>
     <script>
-        // Create stars background
-        function createStars() {
-            const stars = document.getElementById('stars');
-            for (let i = 0; i < 100; i++) {
-                const star = document.createElement('div');
-                star.className = 'star';
-                star.style.width = Math.random() * 3 + 'px';
-                star.style.height = star.style.width;
-                star.style.left = Math.random() * 100 + '%';
-                star.style.top = Math.random() * 100 + '%';
-                star.style.animationDelay = Math.random() * 3 + 's';
-                star.style.opacity = Math.random() * 0.5 + 0.3;
-                stars.appendChild(star);
+        // Status checking functions
+        async function checkStatus() {
+            try {
+                const response = await fetch('/api/health');
+                if (!response.ok) throw new Error('Server not responding');
+                
+                const data = await response.json();
+                
+                // Update server status
+                const serverStatus = document.getElementById('serverStatus');
+                serverStatus.textContent = data.status === 'healthy' ? 'Online' : 'Degraded';
+                serverStatus.className = data.status === 'healthy' ? 'status-value online' : 'status-value warning';
+                
+                // Update session count
+                document.getElementById('sessionCount').textContent = data.activeSessions;
+                
+                // Check WhatsApp connectivity
+                const whatsappStatus = document.getElementById('whatsappStatus');
+                whatsappStatus.textContent = 'Connected';
+                whatsappStatus.className = 'status-value online';
+                
+                // Check MEGA storage
+                const megaStatus = document.getElementById('megaStatus');
+                megaStatus.textContent = data.memory ? 'Connected' : 'Not Configured';
+                megaStatus.className = data.memory ? 'status-value online' : 'status-value warning';
+                
+            } catch (error) {
+                console.error('Status check failed:', error);
+                
+                document.getElementById('serverStatus').textContent = 'Offline';
+                document.getElementById('serverStatus').className = 'status-value offline';
+                
+                document.getElementById('whatsappStatus').textContent = 'Disconnected';
+                document.getElementById('whatsappStatus').className = 'status-value offline';
+                
+                document.getElementById('megaStatus').textContent = 'Unknown';
+                document.getElementById('megaStatus').className = 'status-value warning';
             }
         }
-
-        createStars();
+        
+        // Initial status check
+        document.addEventListener('DOMContentLoaded', () => {
+            checkStatus();
+            // Check every 30 seconds
+            setInterval(checkStatus, 30000);
+        });
     </script>
 </body>
 </html>
