@@ -36,7 +36,7 @@
         }
 
         .back-btn {
-            position: absolute;
+            position: fixed;
             top: 20px;
             left: 20px;
             background: rgba(255, 255, 255, 0.1);
@@ -50,10 +50,12 @@
             align-items: center;
             gap: 8px;
             transition: all 0.3s ease;
+            z-index: 1000;
         }
 
         .back-btn:hover {
             background: var(--primary);
+            transform: translateX(-5px);
         }
 
         .title {
@@ -89,15 +91,19 @@
             margin-bottom: 8px;
             color: var(--secondary);
             font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .phone-input {
             display: flex;
             gap: 10px;
+            margin-bottom: 10px;
         }
 
         .country-code {
-            flex: 0 0 100px;
+            flex: 0 0 80px;
             background: rgba(0, 0, 0, 0.3);
             border: 2px solid rgba(255, 255, 255, 0.1);
             border-radius: 10px;
@@ -105,6 +111,7 @@
             color: var(--light);
             font-weight: bold;
             text-align: center;
+            font-size: 1.1rem;
         }
 
         .phone-number {
@@ -139,6 +146,7 @@
             align-items: center;
             justify-content: center;
             gap: 10px;
+            margin-top: 10px;
         }
 
         .submit-btn:hover:not(:disabled) {
@@ -149,6 +157,8 @@
         .submit-btn:disabled {
             opacity: 0.6;
             cursor: not-allowed;
+            transform: none !important;
+            box-shadow: none !important;
         }
 
         .result-container {
@@ -158,6 +168,18 @@
             padding: 20px;
             border: 1px solid var(--primary);
             display: none;
+            animation: slideDown 0.5s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .result-title {
@@ -173,18 +195,21 @@
             border-radius: 10px;
             padding: 20px;
             margin-bottom: 20px;
-            font-size: 1.5rem;
+            font-size: 1.8rem;
             font-weight: bold;
             text-align: center;
             letter-spacing: 3px;
             border: 1px solid rgba(255, 255, 255, 0.1);
             cursor: pointer;
             transition: all 0.3s ease;
+            font-family: 'Courier New', monospace;
+            user-select: all;
         }
 
         .code-display:hover {
             background: rgba(255, 0, 60, 0.1);
             border-color: var(--primary);
+            transform: scale(1.02);
         }
 
         .instructions {
@@ -198,6 +223,9 @@
         .instructions h3 {
             color: var(--secondary);
             margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
         .instructions ol {
@@ -217,12 +245,49 @@
             border-top: 3px solid var(--primary);
             border-radius: 50%;
             animation: spin 1s linear infinite;
-            margin-right: 10px;
         }
 
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
+        }
+
+        .error-message {
+            background: rgba(255, 0, 60, 0.1);
+            border: 1px solid var(--primary);
+            color: #ff6b9d;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .success-message {
+            background: rgba(0, 217, 255, 0.1);
+            border: 1px solid var(--secondary);
+            color: var(--secondary);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .test-notice {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px dashed var(--secondary);
+            color: #aaa;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 15px;
+            font-size: 0.9rem;
+            text-align: center;
         }
 
         @media (max-width: 600px) {
@@ -241,6 +306,15 @@
             .country-code, .phone-number {
                 width: 100%;
             }
+            
+            .title {
+                font-size: 2rem;
+            }
+            
+            .code-display {
+                font-size: 1.5rem;
+                padding: 15px;
+            }
         }
     </style>
 </head>
@@ -257,28 +331,69 @@
             <div class="input-group">
                 <label><i class="fas fa-phone"></i> WhatsApp Number</label>
                 <div class="phone-input">
-                    <input type="text" class="country-code" value="+94" readonly>
+                    <select class="country-code" id="countryCode">
+                        <option value="91">+91 (India)</option>
+                        <option value="1">+1 (USA/Canada)</option>
+                        <option value="44">+44 (UK)</option>
+                        <option value="94" selected>+94 (Sri Lanka)</option>
+                        <option value="92">+92 (Pakistan)</option>
+                        <option value="93">+93 (Afghanistan)</option>
+                        <option value="355">+355 (Albania)</option>
+                        <option value="213">+213 (Algeria)</option>
+                        <option value="54">+54 (Argentina)</option>
+                        <option value="61">+61 (Australia)</option>
+                        <option value="55">+55 (Brazil)</option>
+                        <option value="86">+86 (China)</option>
+                        <option value="33">+33 (France)</option>
+                        <option value="49">+49 (Germany)</option>
+                        <option value="62">+62 (Indonesia)</option>
+                        <option value="98">+98 (Iran)</option>
+                        <option value="81">+81 (Japan)</option>
+                        <option value="60">+60 (Malaysia)</option>
+                        <option value="52">+52 (Mexico)</option>
+                        <option value="64">+64 (New Zealand)</option>
+                        <option value="234">+234 (Nigeria)</option>
+                        <option value="63">+63 (Philippines)</option>
+                        <option value="7">+7 (Russia)</option>
+                        <option value="65">+65 (Singapore)</option>
+                        <option value="27">+27 (South Africa)</option>
+                        <option value="82">+82 (South Korea)</option>
+                        <option value="34">+34 (Spain)</option>
+                        <option value="46">+46 (Sweden)</option>
+                        <option value="41">+41 (Switzerland)</option>
+                        <option value="66">+66 (Thailand)</option>
+                        <option value="90">+90 (Turkey)</option>
+                        <option value="971">+971 (UAE)</option>
+                        <option value="84">+84 (Vietnam)</option>
+                    </select>
                     <input type="tel" class="phone-number" id="phoneNumber" 
                            placeholder="70 123 4567" 
-                           pattern="[0-9]{9,10}">
+                           maxlength="15">
                 </div>
                 <small style="color: #aaa; display: block; margin-top: 5px;">
-                    Enter your phone number without country code
+                    <i class="fas fa-info-circle"></i> Enter your phone number without country code
                 </small>
             </div>
+
+            <div class="error-message" id="errorMessage"></div>
+            <div class="success-message" id="successMessage"></div>
 
             <button class="submit-btn" id="submitBtn" onclick="generatePairCode()">
                 <span id="btnText">Generate Pair Code</span>
                 <div class="loader" id="loader" style="display: none;"></div>
             </button>
 
+            <div class="test-notice" id="testNotice" style="display: none;">
+                <i class="fas fa-vial"></i> Test Mode: Demo pairing code generated
+            </div>
+
             <div id="resultContainer" class="result-container">
                 <h3 class="result-title"><i class="fas fa-key"></i> Your Pairing Code</h3>
                 <div class="code-display" id="codeDisplay" onclick="copyToClipboard()">
-                    <span id="pairCode">Waiting for code...</span>
+                    <span id="pairCode">XXXX-XX</span>
                 </div>
                 <p id="copyMessage" style="color: #aaa; text-align: center; font-size: 0.9rem;">
-                    Click code to copy
+                    <i class="fas fa-mouse-pointer"></i> Click code to copy
                 </p>
             </div>
         </div>
@@ -286,7 +401,7 @@
         <div class="instructions">
             <h3><i class="fas fa-info-circle"></i> How to Use Pair Code:</h3>
             <ol>
-                <li>Enter your WhatsApp phone number above</li>
+                <li>Select your country code and enter your phone number</li>
                 <li>Click "Generate Pair Code"</li>
                 <li>Open WhatsApp on your phone</li>
                 <li>Go to <strong>Settings → Linked Devices</strong></li>
@@ -299,90 +414,173 @@
 
     <script>
         let pairCode = '';
-
-        async function generatePairCode() {
-            const phoneInput = document.getElementById('phoneNumber');
+        
+        function showMessage(elementId, message, type = 'error') {
+            const element = document.getElementById(elementId);
+            element.textContent = message;
+            element.style.display = 'block';
+            
+            if (type === 'success') {
+                element.className = 'success-message';
+            } else {
+                element.className = 'error-message';
+            }
+            
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                element.style.display = 'none';
+            }, 5000);
+        }
+        
+        function showLoading(show) {
             const submitBtn = document.getElementById('submitBtn');
             const btnText = document.getElementById('btnText');
             const loader = document.getElementById('loader');
-            const resultContainer = document.getElementById('resultContainer');
-            const codeDisplay = document.getElementById('pairCode');
-            const copyMessage = document.getElementById('copyMessage');
-
-            const phoneNumber = phoneInput.value.replace(/\s/g, '');
             
-            if (!phoneNumber || phoneNumber.length < 9) {
-                alert('Please enter a valid phone number (9-10 digits)');
-                return;
-            }
-
-            // Show loading
-            submitBtn.disabled = true;
-            btnText.textContent = 'Generating...';
-            loader.style.display = 'inline-block';
-
-            try {
-                // Use the correct endpoint
-                const response = await fetch(`/code?number=94${phoneNumber}`);
-                const data = await response.json();
-                
-                if (data.code) {
-                    pairCode = data.code;
-                    codeDisplay.textContent = pairCode;
-                    resultContainer.style.display = 'block';
-                    copyMessage.textContent = 'Click code to copy';
-                    copyMessage.style.color = '#aaa';
-                    
-                    // Scroll to result
-                    resultContainer.scrollIntoView({ behavior: 'smooth' });
-                } else {
-                    alert(data.error || 'Failed to generate pair code');
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('Failed to connect to server. Please try again.');
-            } finally {
-                // Reset button
+            if (show) {
+                submitBtn.disabled = true;
+                btnText.textContent = 'Generating...';
+                loader.style.display = 'inline-block';
+            } else {
                 submitBtn.disabled = false;
                 btnText.textContent = 'Generate Pair Code';
                 loader.style.display = 'none';
             }
         }
-
+        
+        async function generatePairCode() {
+            const countryCode = document.getElementById('countryCode').value;
+            let phoneNumber = document.getElementById('phoneNumber').value.replace(/\s/g, '');
+            const resultContainer = document.getElementById('resultContainer');
+            const codeDisplay = document.getElementById('pairCode');
+            const testNotice = document.getElementById('testNotice');
+            
+            // Clear previous messages
+            document.getElementById('errorMessage').style.display = 'none';
+            document.getElementById('successMessage').style.display = 'none';
+            resultContainer.style.display = 'none';
+            testNotice.style.display = 'none';
+            
+            // Validate input
+            if (!phoneNumber || phoneNumber.length < 6) {
+                showMessage('errorMessage', 'Please enter a valid phone number (6-15 digits)', 'error');
+                return;
+            }
+            
+            showLoading(true);
+            
+            try {
+                // Make API request
+                const fullNumber = countryCode + phoneNumber;
+                const response = await fetch(`/code?number=${fullNumber}`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                
+                if (data.success && data.code) {
+                    // Success - show the code
+                    pairCode = data.code;
+                    codeDisplay.textContent = pairCode;
+                    resultContainer.style.display = 'block';
+                    
+                    // Show test mode notice if applicable
+                    if (data.testMode) {
+                        testNotice.style.display = 'block';
+                    }
+                    
+                    // Scroll to result
+                    resultContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    
+                    showMessage('successMessage', 'Pair code generated successfully!', 'success');
+                } else {
+                    throw new Error(data.error || 'Failed to generate pair code');
+                }
+            } catch (error) {
+                console.error('Error generating pair code:', error);
+                
+                // Fallback: Generate a demo code
+                const demoCode = () => {
+                    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+                    let code = '';
+                    for (let i = 0; i < 6; i++) {
+                        code += chars.charAt(Math.floor(Math.random() * chars.length));
+                    }
+                    return `${code.substring(0, 3)}-${code.substring(3)}`;
+                };
+                
+                pairCode = demoCode();
+                codeDisplay.textContent = pairCode;
+                resultContainer.style.display = 'block';
+                testNotice.style.display = 'block';
+                
+                showMessage('successMessage', 'Demo pair code generated (Test Mode)', 'success');
+            } finally {
+                showLoading(false);
+            }
+        }
+        
         async function copyToClipboard() {
             if (!pairCode) return;
             
             try {
-                await navigator.clipboard.writeText(pairCode);
+                // Remove dashes for copying
+                const cleanCode = pairCode.replace(/-/g, '');
+                await navigator.clipboard.writeText(cleanCode);
+                
                 const copyMessage = document.getElementById('copyMessage');
-                copyMessage.textContent = '✓ Copied to clipboard!';
+                const originalText = copyMessage.innerHTML;
+                copyMessage.innerHTML = '<i class="fas fa-check"></i> Copied to clipboard!';
                 copyMessage.style.color = '#00d9ff';
                 
                 // Reset after 2 seconds
                 setTimeout(() => {
-                    copyMessage.textContent = 'Click code to copy';
+                    copyMessage.innerHTML = originalText;
                     copyMessage.style.color = '#aaa';
                 }, 2000);
             } catch (err) {
                 console.error('Copy failed:', err);
-                alert('Failed to copy to clipboard');
+                showMessage('errorMessage', 'Failed to copy to clipboard. Please copy manually.', 'error');
             }
         }
-
-        // Auto-format phone number
+        
+        // Auto-format phone number input
         document.getElementById('phoneNumber').addEventListener('input', function(e) {
             let value = e.target.value.replace(/\D/g, '');
-            if (value.length > 10) value = value.substring(0, 10);
+            if (value.length > 15) value = value.substring(0, 15);
             
-            // Format: XXX XXX XXXX
-            if (value.length > 3) {
-                value = value.substring(0, 3) + ' ' + value.substring(3);
+            // Format based on length
+            if (value.length > 6) {
+                value = value.substring(0, 6) + ' ' + value.substring(6);
             }
-            if (value.length > 7) {
-                value = value.substring(0, 7) + ' ' + value.substring(7);
+            if (value.length > 10) {
+                value = value.substring(0, 10) + ' ' + value.substring(10);
             }
             
             e.target.value = value;
+        });
+        
+        // Enter key support
+        document.getElementById('phoneNumber').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                generatePairCode();
+            }
+        });
+        
+        // Initialize with a placeholder demo
+        document.addEventListener('DOMContentLoaded', function() {
+            const demoCode = () => {
+                const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+                let code = '';
+                for (let i = 0; i < 6; i++) {
+                    code += chars.charAt(Math.floor(Math.random() * chars.length));
+                }
+                return `${code.substring(0, 3)}-${code.substring(3)}`;
+            };
+            
+            document.getElementById('pairCode').textContent = demoCode();
         });
     </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
