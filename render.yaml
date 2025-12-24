@@ -1,1 +1,21 @@
-
+services:
+  - type: web
+    name: dark-nova-xmd
+    env: node
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MEGA_EMAIL
+        sync: false
+      - key: MEGA_PASSWORD
+        sync: false
+      - key: PORT
+        value: 3000
+    healthCheckPath: /api/health
+    autoDeploy: true
+    disk:
+      name: sessions
+      mountPath: /opt/render/project/src/sessions
+      sizeGB: 1
