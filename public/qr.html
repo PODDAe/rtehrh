@@ -1,1 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code Scanner - DARK NOVA XMD</title>
+    <style>
+        :root {
+            --primary: #ff003c;
+            --secondary: #00d9ff;
+            --dark: #0a0a0f;
+            --light: #ffffff;
+        }
 
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--dark) 0%, #1a1a2e 100%);
+            color: var(--light);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .header {
+            margin-bottom: 30px;
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: var(--primary);
+        }
+
+        .title {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .subtitle {
+            color: #aaa;
+            margin-bottom: 30px;
+        }
+
+        .qr-container {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        #qrImage {
+            width: 300px;
+            height: 300px;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border: 2px solid var(--primary);
+        }
+
+        .instructions {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+            text-align: left;
+        }
+
+        .instructions h3 {
+            color: var(--secondary);
+            margin-bottom: 15px;
+        }
+
+        .instructions ol {
+            padding-left: 20px;
+        }
+
+        .instructions li {
+            margin-bottom: 10px;
+            color: #ccc;
+        }
+
+        .status {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 10px;
+            background: rgba(255, 0, 60, 0.1);
+            border: 1px solid var(--primary);
+        }
+
+        .loader {
+            display: inline-block;
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255, 255, 255, 0.1);
+            border-top: 5px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 20px 0;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .refresh-btn {
+            background: linear-gradient(45deg, var(--primary), #ff2b6b);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+
+        .refresh-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(255, 0, 60, 0.3);
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .qr-container {
+                padding: 20px;
+            }
+            
+            #qrImage {
+                width: 250px;
+                height: 250px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="/" class="back-btn">
+        <i class="fas fa-arrow-left"></i> Back to Home
+    </a>
+
+    <div class="container">
+        <div class="header">
+            <h1 class="title">QR Code Scanner</h1>
+            <p class="subtitle">Scan to generate WhatsApp session</p>
+        </div>
+
+        <div class="qr-container">
+            <div id="status" class="status">Loading QR code...</div>
+            <div id="loader" class="loader"></div>
+            <img id="qrImage" src="" alt="QR Code" style="display: none;" />
+        </div>
+
+        <div class="instructions" id="instructions" style="display: none;">
+            <h3><i class="fas fa-info-circle"></i> How to Scan:</h3>
+            <ol>
+                <li>Open WhatsApp on your phone</li>
+                <li>Tap <strong>Settings</strong> (⋮) → <strong>Linked Devices</strong></li>
+                <li>Tap <strong>"Link a Device"</strong></li>
+                <li>Point your camera at the QR code above</li>
+                <li>Wait for session to generate automatically</li>
+            </ol>
+        </div>
+
+        <button class="refresh-btn" onclick="generateQR()" id="refreshBtn" style="display: none;">
+            <i class="fas fa-sync-alt"></i> Generate New QR Code
+        </button>
+    </div>
+
+    <script>
+        async function generateQR() {
+            const status = document.getElementById('status');
+            const loader = document.getElementById('loader');
+            const qrImage = document.getElementById('qrImage');
+            const instructions = document.getElementById('instructions');
+            const refreshBtn = document.getElementById('refreshBtn');
+            
+            // Reset display
+            status.style.display = 'block';
+            loader.style.display = 'block';
+            qrImage.style.display = 'none';
+            instructions.style.display = 'none';
+            refreshBtn.style.display = 'none';
+            
+            status.textContent = 'Generating QR code...';
+            
+            try {
+                const response = await fetch('/qr');
+                const data = await response.json();
+                
+                if (data.success && data.qr) {
+                    qrImage.src = data.qr;
+                    qrImage.style.display = 'block';
+                    loader.style.display = 'none';
+                    instructions.style.display = 'block';
+                    refreshBtn.style.display = 'block';
+                    status.textContent = 'QR Code Generated! Scan with WhatsApp.';
+                    status.style.background = 'rgba(0, 217, 255, 0.1)';
+                    status.style.borderColor = 'var(--secondary)';
+                } else {
+                    status.textContent = data.error || 'Failed to generate QR code';
+                    status.style.background = 'rgba(255, 0, 60, 0.1)';
+                    status.style.borderColor = 'var(--primary)';
+                    loader.style.display = 'none';
+                    refreshBtn.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                status.textContent = 'Failed to connect to server';
+                status.style.background = 'rgba(255, 0, 60, 0.1)';
+                status.style.borderColor = 'var(--primary)';
+                loader.style.display = 'none';
+                refreshBtn.style.display = 'block';
+            }
+        }
+
+        // Generate QR code on page load
+        document.addEventListener('DOMContentLoaded', generateQR);
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+</body>
+</html>
