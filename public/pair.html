@@ -1,1 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pair Code - DARK NOVA XMD</title>
+    <style>
+        :root {
+            --primary: #ff003c;
+            --secondary: #00d9ff;
+            --dark: #0a0a0f;
+            --light: #ffffff;
+        }
 
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--dark) 0%, #1a1a2e 100%);
+            color: var(--light);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 500px;
+            width: 100%;
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: var(--primary);
+        }
+
+        .title {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-align: center;
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .subtitle {
+            color: #aaa;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .form-container {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--secondary);
+            font-weight: 500;
+        }
+
+        .phone-input {
+            display: flex;
+            gap: 10px;
+        }
+
+        .country-code {
+            flex: 0 0 100px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            color: var(--light);
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .phone-number {
+            flex: 1;
+            background: rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            color: var(--light);
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+        }
+
+        .phone-number:focus {
+            outline: none;
+            border-color: var(--secondary);
+            box-shadow: 0 0 0 3px rgba(0, 217, 255, 0.3);
+        }
+
+        .submit-btn {
+            width: 100%;
+            background: linear-gradient(45deg, var(--primary), #ff2b6b);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 18px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .submit-btn:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(255, 0, 60, 0.3);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .result-container {
+            margin-top: 30px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 20px;
+            border: 1px solid var(--primary);
+            display: none;
+        }
+
+        .result-title {
+            color: var(--secondary);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .code-display {
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-align: center;
+            letter-spacing: 3px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .code-display:hover {
+            background: rgba(255, 0, 60, 0.1);
+            border-color: var(--primary);
+        }
+
+        .instructions {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 30px;
+            text-align: left;
+        }
+
+        .instructions h3 {
+            color: var(--secondary);
+            margin-bottom: 15px;
+        }
+
+        .instructions ol {
+            padding-left: 20px;
+        }
+
+        .instructions li {
+            margin-bottom: 10px;
+            color: #ccc;
+        }
+
+        .loader {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-top: 3px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .form-container {
+                padding: 20px;
+            }
+            
+            .phone-input {
+                flex-direction: column;
+            }
+            
+            .country-code, .phone-number {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="/" class="back-btn">
+        <i class="fas fa-arrow-left"></i> Back to Home
+    </a>
+
+    <div class="container">
+        <h1 class="title">Pair Code Generator</h1>
+        <p class="subtitle">Enter your WhatsApp number to get pairing code</p>
+
+        <div class="form-container">
+            <div class="input-group">
+                <label><i class="fas fa-phone"></i> WhatsApp Number</label>
+                <div class="phone-input">
+                    <input type="text" class="country-code" value="+94" readonly>
+                    <input type="tel" class="phone-number" id="phoneNumber" 
+                           placeholder="70 123 4567" 
+                           pattern="[0-9]{9,10}">
+                </div>
+                <small style="color: #aaa; display: block; margin-top: 5px;">
+                    Enter your phone number without country code
+                </small>
+            </div>
+
+            <button class="submit-btn" id="submitBtn" onclick="generatePairCode()">
+                <span id="btnText">Generate Pair Code</span>
+                <div class="loader" id="loader" style="display: none;"></div>
+            </button>
+
+            <div id="resultContainer" class="result-container">
+                <h3 class="result-title"><i class="fas fa-key"></i> Your Pairing Code</h3>
+                <div class="code-display" id="codeDisplay" onclick="copyToClipboard()">
+                    <span id="pairCode">Waiting for code...</span>
+                </div>
+                <p id="copyMessage" style="color: #aaa; text-align: center; font-size: 0.9rem;">
+                    Click code to copy
+                </p>
+            </div>
+        </div>
+
+        <div class="instructions">
+            <h3><i class="fas fa-info-circle"></i> How to Use Pair Code:</h3>
+            <ol>
+                <li>Enter your WhatsApp phone number above</li>
+                <li>Click "Generate Pair Code"</li>
+                <li>Open WhatsApp on your phone</li>
+                <li>Go to <strong>Settings → Linked Devices</strong></li>
+                <li>Tap <strong>"Link a Device" → "Link with phone number"</strong></li>
+                <li>Enter the pairing code shown above</li>
+                <li>Session will be generated automatically</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        let pairCode = '';
+
+        async function generatePairCode() {
+            const phoneInput = document.getElementById('phoneNumber');
+            const submitBtn = document.getElementById('submitBtn');
+            const btnText = document.getElementById('btnText');
+            const loader = document.getElementById('loader');
+            const resultContainer = document.getElementById('resultContainer');
+            const codeDisplay = document.getElementById('pairCode');
+            const copyMessage = document.getElementById('copyMessage');
+
+            const phoneNumber = phoneInput.value.replace(/\s/g, '');
+            
+            if (!phoneNumber || phoneNumber.length < 9) {
+                alert('Please enter a valid phone number (9-10 digits)');
+                return;
+            }
+
+            // Show loading
+            submitBtn.disabled = true;
+            btnText.textContent = 'Generating...';
+            loader.style.display = 'inline-block';
+
+            try {
+                // Use the correct endpoint
+                const response = await fetch(`/code?number=94${phoneNumber}`);
+                const data = await response.json();
+                
+                if (data.code) {
+                    pairCode = data.code;
+                    codeDisplay.textContent = pairCode;
+                    resultContainer.style.display = 'block';
+                    copyMessage.textContent = 'Click code to copy';
+                    copyMessage.style.color = '#aaa';
+                    
+                    // Scroll to result
+                    resultContainer.scrollIntoView({ behavior: 'smooth' });
+                } else {
+                    alert(data.error || 'Failed to generate pair code');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to connect to server. Please try again.');
+            } finally {
+                // Reset button
+                submitBtn.disabled = false;
+                btnText.textContent = 'Generate Pair Code';
+                loader.style.display = 'none';
+            }
+        }
+
+        async function copyToClipboard() {
+            if (!pairCode) return;
+            
+            try {
+                await navigator.clipboard.writeText(pairCode);
+                const copyMessage = document.getElementById('copyMessage');
+                copyMessage.textContent = '✓ Copied to clipboard!';
+                copyMessage.style.color = '#00d9ff';
+                
+                // Reset after 2 seconds
+                setTimeout(() => {
+                    copyMessage.textContent = 'Click code to copy';
+                    copyMessage.style.color = '#aaa';
+                }, 2000);
+            } catch (err) {
+                console.error('Copy failed:', err);
+                alert('Failed to copy to clipboard');
+            }
+        }
+
+        // Auto-format phone number
+        document.getElementById('phoneNumber').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length > 10) value = value.substring(0, 10);
+            
+            // Format: XXX XXX XXXX
+            if (value.length > 3) {
+                value = value.substring(0, 3) + ' ' + value.substring(3);
+            }
+            if (value.length > 7) {
+                value = value.substring(0, 7) + ' ' + value.substring(7);
+            }
+            
+            e.target.value = value;
+        });
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+</body>
+</html>
