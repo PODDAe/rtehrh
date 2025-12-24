@@ -1,1 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DARK NOVA XMD | Session Generator</title>
+    <style>
+        :root {
+            --primary: #ff003c;
+            --secondary: #00d9ff;
+            --dark: #0a0a0f;
+            --darker: #050508;
+            --light: #ffffff;
+            --card-bg: rgba(20, 20, 30, 0.95);
+            --neon-glow: 0 0 20px var(--primary);
+        }
 
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--darker) 0%, var(--dark) 100%);
+            color: var(--light);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .header {
+            margin-bottom: 40px;
+        }
+
+        .logo {
+            font-size: 3.5rem;
+            font-weight: 900;
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: var(--neon-glow);
+            margin-bottom: 10px;
+            letter-spacing: 3px;
+        }
+
+        .tagline {
+            color: #aaa;
+            font-size: 1.2rem;
+            letter-spacing: 2px;
+            margin-bottom: 30px;
+        }
+
+        .methods-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .method-card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            cursor: pointer;
+        }
+
+        .method-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+            box-shadow: var(--neon-glow);
+        }
+
+        .method-icon {
+            font-size: 3rem;
+            color: var(--secondary);
+            margin-bottom: 20px;
+        }
+
+        .method-title {
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+            color: var(--light);
+        }
+
+        .method-desc {
+            color: #ccc;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            display: inline-block;
+            background: linear-gradient(45deg, var(--primary), #ff2b6b);
+            color: white;
+            padding: 15px 30px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 20px rgba(255, 0, 60, 0.3);
+        }
+
+        .btn.qr {
+            background: linear-gradient(45deg, #00d9ff, #0099ff);
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 40px;
+        }
+
+        .feature {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 3px solid var(--primary);
+        }
+
+        .feature h4 {
+            color: var(--secondary);
+            margin-bottom: 10px;
+        }
+
+        footer {
+            margin-top: 50px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .footer-links {
+            margin-bottom: 10px;
+        }
+
+        .footer-links a {
+            color: #aaa;
+            text-decoration: none;
+            margin: 0 10px;
+            transition: color 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            color: var(--secondary);
+        }
+
+        @media (max-width: 768px) {
+            .logo {
+                font-size: 2.5rem;
+            }
+            
+            .methods-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .method-card {
+                padding: 20px;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="logo">DARK NOVA XMD</h1>
+            <p class="tagline">⚡ Premium WhatsApp Session Generator ⚡</p>
+        </div>
+
+        <div class="methods-grid">
+            <div class="method-card" onclick="window.location.href='/qrpage'">
+                <div class="method-icon">
+                    <i class="fas fa-qrcode"></i>
+                </div>
+                <h3 class="method-title">QR Code Method</h3>
+                <p class="method-desc">Scan QR code with your WhatsApp to generate session instantly.</p>
+                <a href="/qrpage" class="btn qr">Use QR Code</a>
+            </div>
+
+            <div class="method-card" onclick="window.location.href='/pairpage'">
+                <div class="method-icon">
+                    <i class="fas fa-mobile-alt"></i>
+                </div>
+                <h3 class="method-title">Pair Code Method</h3>
+                <p class="method-desc">Enter your phone number to receive a pairing code for WhatsApp.</p>
+                <a href="/pairpage" class="btn">Use Pair Code</a>
+            </div>
+        </div>
+
+        <div class="features">
+            <div class="feature">
+                <h4><i class="fas fa-shield-alt"></i> Secure</h4>
+                <p>Encrypted session storage with MEGA cloud security</p>
+            </div>
+            <div class="feature">
+                <h4><i class="fas fa-bolt"></i> Fast</h4>
+                <p>Generate sessions in seconds with optimized technology</p>
+            </div>
+            <div class="feature">
+                <h4><i class="fas fa-sync-alt"></i> Multi-Device</h4>
+                <p>Supports WhatsApp Multi-Device protocol</p>
+            </div>
+        </div>
+
+        <footer>
+            <div class="footer-links">
+                <a href="https://github.com/dula9x/DARK-NOVA-XMD" target="_blank">
+                    <i class="fab fa-github"></i> GitHub
+                </a>
+                <a href="https://whatsapp.com/channel/0029Vb9yA9K9sBI799oc7U2T" target="_blank">
+                    <i class="fab fa-whatsapp"></i> WhatsApp
+                </a>
+                <a href="https://t.me/DARKNOVAXMD" target="_blank">
+                    <i class="fab fa-telegram"></i> Telegram
+                </a>
+            </div>
+            <p>© 2024 DARK NOVA XMD | Created by Dulina Nethmira & Sheron Elijah</p>
+            <p>Powered by WHITE ALPHA WOLF X TEAM</p>
+        </footer>
+    </div>
+
+    <script>
+        // Add some interactive effects
+        document.addEventListener('DOMContentLoaded', function() {
+            const cards = document.querySelectorAll('.method-card');
+            
+            cards.forEach(card => {
+                card.addEventListener('mouseenter', () => {
+                    card.style.transform = 'translateY(-10px)';
+                });
+                
+                card.addEventListener('mouseleave', () => {
+                    card.style.transform = 'translateY(0)';
+                });
+            });
+        });
+    </script>
+</body>
+</html>
