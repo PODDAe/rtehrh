@@ -1,13 +1,14 @@
 {
-  "name": "dark-nova-xmd-vercel",
-  "version": "2.0.0",
+  "name": "dark-nova-xmd-mega-fixed",
+  "version": "1.0.0",
   "type": "module",
-  "description": "WhatsApp Session Generator for Vercel",
+  "description": "WhatsApp Session Generator with MEGA Storage",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "dev": "node index.js",
-    "build": "echo 'Build complete'"
+    "dev": "nodemon index.js",
+    "test": "node test-mega.js",
+    "mega-test": "node -e \"import { testConnection } from './lib/mega.js'; testConnection().then(console.log).catch(console.error);\""
   },
   "dependencies": {
     "@whiskeysockets/baileys": "^6.7.21",
@@ -19,6 +20,9 @@
     "qrcode": "^1.5.4",
     "awesome-phonenumber": "^5.9.0",
     "fs-extra": "^11.3.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.9"
   },
   "engines": {
     "node": ">=18.0.0"
