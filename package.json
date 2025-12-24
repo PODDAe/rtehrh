@@ -1,26 +1,14 @@
 {
-  "name": "dark-nova-xmd-session-generator",
+  "name": "dark-nova-xmd-vercel",
   "version": "2.0.0",
   "type": "module",
-  "description": "Beautiful WhatsApp Session Generator with Pair Code & QR",
+  "description": "WhatsApp Session Generator for Vercel",
   "main": "index.js",
-  "engines": {
-    "node": ">=20.0.0"
-  },
   "scripts": {
     "start": "node index.js",
-    "dev": "nodemon index.js",
-    "vercel-build": "npm install"
+    "dev": "node --watch index.js",
+    "build": "echo 'No build step required'"
   },
-  "keywords": [
-    "whatsapp",
-    "session-generator",
-    "baileys",
-    "pairing",
-    "qr-code"
-  ],
-  "author": "DARK NOVA XMD",
-  "license": "MIT",
   "dependencies": {
     "@whiskeysockets/baileys": "^6.7.21",
     "express": "^4.21.2",
@@ -32,7 +20,7 @@
     "awesome-phonenumber": "^5.9.0",
     "fs-extra": "^11.3.0"
   },
-  "devDependencies": {
-    "nodemon": "^3.1.9"
+  "engines": {
+    "node": ">=18.0.0"
   }
 }
