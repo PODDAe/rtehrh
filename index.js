@@ -160,9 +160,9 @@ async function createWhatsAppSession(sessionId) {
                   text: `🎉 *DARK NOVA XMD SESSION GENERATED*\n\n` +
                         `🔐 *Session ID:*\n\`${fileId}\`\n\n` +
                         `💾 *Save this ID for bot configuration*\n\n` +
-                        `⭐ *GitHub:* https://github.com/dula9x/DARK-NOVA-XMD\n` +
-                        `👥 *WhatsApp Channel:* https://whatsapp.com/channel/0029Vb9yA9K9sBI799oc7U2T\n\n` +
-                        `⚡ *Powered by WHITE ALPHA WOLF X TEAM*`
+                        `⭐ *GitHub:* https://github.com/alpha-x-team-ofc/DTZ-NOVA-X-MD-V.1\n` +
+                        `👥 *WhatsApp Channel:https://whatsapp.com/channel/0029Vb6mfVdEAKWH5Sgs9y2L* \n\n` +
+                        `⚡ *Powered by DTZ TEAM*`
                 });
               }
             }
@@ -262,12 +262,12 @@ async function createPairSession(sessionId, phoneNumber) {
             // Send session ID to user
             if (sock.user?.id) {
               await sock.sendMessage(sock.user.id, {
-                text: `🎉 *DARK NOVA XMD PAIR SESSION*\n\n` +
-                      `🔐 *Session ID:*\n\`${fileId}\`\n\n` +
-                      `💾 *Save this ID for bot configuration*\n\n` +
-                      `⭐ *GitHub:* https://github.com/dula9x/DARK-NOVA-XMD\n` +
-                      `👥 *WhatsApp Channel:* https://whatsapp.com/channel/0029Vb9yA9K9sBI799oc7U2T\n\n` +
-                      `⚡ *Powered by WHITE ALPHA WOLF X TEAM*`
+                  text: `🎉 *DARK NOVA XMD SESSION GENERATED*\n\n` +
+                        `🔐 *Session ID:*\n\`${fileId}\`\n\n` +
+                        `💾 *Save this ID for bot configuration*\n\n` +
+                        `⭐ *GitHub:* https://github.com/alpha-x-team-ofc/DTZ-NOVA-X-MD-V.1\n` +
+                        `👥 *WhatsApp Channel:https://whatsapp.com/channel/0029Vb6mfVdEAKWH5Sgs9y2L* \n\n` +
+                        `⚡ *Powered by DTZ TEAM*`
               });
             }
           }
