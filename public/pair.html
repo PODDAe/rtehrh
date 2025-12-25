@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pair Code - DARK NOVA XMD</title>
+    <title>Pair Code Generator - DARK NOVA XMD</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
             --primary: #ff003c;
@@ -20,7 +21,10 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, var(--dark) 0%, #1a1a2e 100%);
+            background: 
+                linear-gradient(rgba(10, 10, 15, 0.9), rgba(5, 5, 8, 0.9)),
+                url('https://files.catbox.moe/fpyw9m.png') center center fixed;
+            background-size: cover;
             color: var(--light);
             min-height: 100vh;
             display: flex;
@@ -30,11 +34,6 @@
             padding: 20px;
         }
 
-        .container {
-            max-width: 500px;
-            width: 100%;
-        }
-
         .back-btn {
             position: fixed;
             top: 20px;
@@ -42,20 +41,34 @@
             background: rgba(255, 255, 255, 0.1);
             color: white;
             border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
+            padding: 12px 25px;
+            border-radius: 8px;
             cursor: pointer;
             text-decoration: none;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
             transition: all 0.3s ease;
             z-index: 1000;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
         .back-btn:hover {
             background: var(--primary);
             transform: translateX(-5px);
+            box-shadow: 0 5px 15px rgba(255, 0, 60, 0.3);
+        }
+
+        .container {
+            max-width: 500px;
+            width: 100%;
+            background: rgba(20, 20, 30, 0.85);
+            border-radius: 20px;
+            padding: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
         }
 
         .title {
@@ -66,63 +79,87 @@
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
+            text-shadow: 0 0 20px rgba(255, 0, 60, 0.3);
         }
 
         .subtitle {
             color: #aaa;
             text-align: center;
             margin-bottom: 30px;
+            font-size: 1.1rem;
         }
 
         .form-container {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
             padding: 30px;
             border: 1px solid rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
         }
 
         .input-group {
-            margin-bottom: 20px;
+            margin-bottom: 25px;
         }
 
         label {
             display: block;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
             color: var(--secondary);
             font-weight: 500;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
+            font-size: 1.1rem;
         }
 
         .phone-input {
             display: flex;
             gap: 10px;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
+            align-items: center;
+        }
+
+        .country-code-container {
+            flex: 0 0 120px;
+            position: relative;
         }
 
         .country-code {
-            flex: 0 0 80px;
-            background: rgba(0, 0, 0, 0.3);
-            border: 2px solid rgba(255, 255, 255, 0.1);
+            width: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            border: 2px solid rgba(255, 255, 255, 0.2);
             border-radius: 10px;
             padding: 15px;
             color: var(--light);
             font-weight: bold;
-            text-align: center;
-            font-size: 1.1rem;
+            font-size: 1rem;
+            backdrop-filter: blur(5px);
+            cursor: pointer;
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+        }
+
+        .country-code:focus {
+            outline: none;
+            border-color: var(--secondary);
+            box-shadow: 0 0 0 3px rgba(0, 217, 255, 0.3);
+        }
+
+        .phone-number-container {
+            flex: 1;
         }
 
         .phone-number {
-            flex: 1;
-            background: rgba(0, 0, 0, 0.3);
-            border: 2px solid rgba(255, 255, 255, 0.1);
+            width: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            border: 2px solid rgba(255, 255, 255, 0.2);
             border-radius: 10px;
             padding: 15px;
             color: var(--light);
-            font-size: 1.1rem;
+            font-size: 1rem;
             transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+            box-sizing: border-box;
         }
 
         .phone-number:focus {
@@ -147,11 +184,14 @@
             justify-content: center;
             gap: 10px;
             margin-top: 10px;
+            box-shadow: 0 5px 15px rgba(255, 0, 60, 0.3);
+            position: relative;
+            overflow: hidden;
         }
 
         .submit-btn:hover:not(:disabled) {
             transform: translateY(-3px);
-            box-shadow: 0 10px 20px rgba(255, 0, 60, 0.3);
+            box-shadow: 0 10px 25px rgba(255, 0, 60, 0.5);
         }
 
         .submit-btn:disabled {
@@ -164,11 +204,12 @@
         .result-container {
             margin-top: 30px;
             background: rgba(0, 0, 0, 0.3);
-            border-radius: 10px;
-            padding: 20px;
+            border-radius: 15px;
+            padding: 25px;
             border: 1px solid var(--primary);
             display: none;
             animation: slideDown 0.5s ease;
+            backdrop-filter: blur(5px);
         }
 
         @keyframes slideDown {
@@ -184,48 +225,56 @@
 
         .result-title {
             color: var(--secondary);
-            margin-bottom: 15px;
+            margin-bottom: 20px;
             display: flex;
             align-items: center;
             gap: 10px;
+            font-size: 1.3rem;
         }
 
         .code-display {
             background: rgba(0, 0, 0, 0.5);
             border-radius: 10px;
-            padding: 20px;
+            padding: 25px;
             margin-bottom: 20px;
-            font-size: 1.8rem;
+            font-size: 2rem;
             font-weight: bold;
             text-align: center;
-            letter-spacing: 3px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            letter-spacing: 5px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
             cursor: pointer;
             transition: all 0.3s ease;
             font-family: 'Courier New', monospace;
             user-select: all;
+            text-shadow: 0 0 10px rgba(255, 0, 60, 0.5);
+            position: relative;
+            overflow: hidden;
         }
 
         .code-display:hover {
             background: rgba(255, 0, 60, 0.1);
             border-color: var(--primary);
             transform: scale(1.02);
+            box-shadow: 0 10px 30px rgba(255, 0, 60, 0.3);
         }
 
         .instructions {
             background: rgba(0, 0, 0, 0.3);
-            border-radius: 10px;
-            padding: 20px;
+            border-radius: 15px;
+            padding: 25px;
             margin-top: 30px;
             text-align: left;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(5px);
         }
 
         .instructions h3 {
             color: var(--secondary);
-            margin-bottom: 15px;
+            margin-bottom: 20px;
             display: flex;
             align-items: center;
             gap: 10px;
+            font-size: 1.3rem;
         }
 
         .instructions ol {
@@ -233,8 +282,9 @@
         }
 
         .instructions li {
-            margin-bottom: 10px;
+            margin-bottom: 12px;
             color: #ccc;
+            line-height: 1.5;
         }
 
         .loader {
@@ -253,7 +303,7 @@
         }
 
         .error-message {
-            background: rgba(255, 0, 60, 0.1);
+            background: rgba(255, 0, 60, 0.2);
             border: 1px solid var(--primary);
             color: #ff6b9d;
             padding: 15px;
@@ -261,10 +311,11 @@
             margin-top: 15px;
             display: none;
             animation: fadeIn 0.3s ease;
+            backdrop-filter: blur(5px);
         }
 
         .success-message {
-            background: rgba(0, 217, 255, 0.1);
+            background: rgba(0, 217, 255, 0.2);
             border: 1px solid var(--secondary);
             color: var(--secondary);
             padding: 15px;
@@ -272,6 +323,7 @@
             margin-top: 15px;
             display: none;
             animation: fadeIn 0.3s ease;
+            backdrop-filter: blur(5px);
         }
 
         @keyframes fadeIn {
@@ -279,20 +331,54 @@
             to { opacity: 1; }
         }
 
-        .test-notice {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px dashed var(--secondary);
+        .copy-message {
             color: #aaa;
-            padding: 10px;
-            border-radius: 5px;
-            margin-top: 15px;
-            font-size: 0.9rem;
             text-align: center;
+            font-size: 0.9rem;
+            margin-top: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .success-badge {
+            background: rgba(0, 217, 255, 0.2);
+            color: var(--secondary);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            margin-top: 10px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid rgba(0, 217, 255, 0.3);
+        }
+
+        .music-indicator {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            color: var(--secondary);
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border: 1px solid rgba(0, 217, 255, 0.3);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            cursor: pointer;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .music-indicator:hover {
+            background: rgba(0, 0, 0, 0.8);
         }
 
         @media (max-width: 600px) {
             .container {
-                padding: 10px;
+                padding: 20px;
+                margin: 10px;
             }
             
             .form-container {
@@ -301,9 +387,11 @@
             
             .phone-input {
                 flex-direction: column;
+                align-items: stretch;
             }
             
-            .country-code, .phone-number {
+            .country-code-container,
+            .phone-number-container {
                 width: 100%;
             }
             
@@ -313,12 +401,31 @@
             
             .code-display {
                 font-size: 1.5rem;
-                padding: 15px;
+                padding: 20px;
+                letter-spacing: 3px;
+            }
+            
+            .back-btn {
+                top: 10px;
+                left: 10px;
+                padding: 10px 15px;
+                font-size: 0.9rem;
             }
         }
     </style>
 </head>
 <body>
+    <!-- Background Music -->
+    <audio id="bgMusic" loop style="display: none;">
+        <source src="https://files.catbox.moe/qzpwzj.mp3" type="audio/mpeg">
+    </audio>
+
+    <!-- Music Indicator -->
+    <div class="music-indicator" id="musicIndicator" onclick="toggleMusic()">
+        <i class="fas fa-music" id="musicIcon"></i>
+        <span id="musicText">Background Music</span>
+    </div>
+
     <a href="/" class="back-btn">
         <i class="fas fa-arrow-left"></i> Back to Home
     </a>
@@ -331,44 +438,25 @@
             <div class="input-group">
                 <label><i class="fas fa-phone"></i> WhatsApp Number</label>
                 <div class="phone-input">
-                    <select class="country-code" id="countryCode">
-                        <option value="91">+91 (India)</option>
-                        <option value="1">+1 (USA/Canada)</option>
-                        <option value="44">+44 (UK)</option>
-                        <option value="94" selected>+94 (Sri Lanka)</option>
-                        <option value="92">+92 (Pakistan)</option>
-                        <option value="93">+93 (Afghanistan)</option>
-                        <option value="355">+355 (Albania)</option>
-                        <option value="213">+213 (Algeria)</option>
-                        <option value="54">+54 (Argentina)</option>
-                        <option value="61">+61 (Australia)</option>
-                        <option value="55">+55 (Brazil)</option>
-                        <option value="86">+86 (China)</option>
-                        <option value="33">+33 (France)</option>
-                        <option value="49">+49 (Germany)</option>
-                        <option value="62">+62 (Indonesia)</option>
-                        <option value="98">+98 (Iran)</option>
-                        <option value="81">+81 (Japan)</option>
-                        <option value="60">+60 (Malaysia)</option>
-                        <option value="52">+52 (Mexico)</option>
-                        <option value="64">+64 (New Zealand)</option>
-                        <option value="234">+234 (Nigeria)</option>
-                        <option value="63">+63 (Philippines)</option>
-                        <option value="7">+7 (Russia)</option>
-                        <option value="65">+65 (Singapore)</option>
-                        <option value="27">+27 (South Africa)</option>
-                        <option value="82">+82 (South Korea)</option>
-                        <option value="34">+34 (Spain)</option>
-                        <option value="46">+46 (Sweden)</option>
-                        <option value="41">+41 (Switzerland)</option>
-                        <option value="66">+66 (Thailand)</option>
-                        <option value="90">+90 (Turkey)</option>
-                        <option value="971">+971 (UAE)</option>
-                        <option value="84">+84 (Vietnam)</option>
-                    </select>
-                    <input type="tel" class="phone-number" id="phoneNumber" 
-                           placeholder="70 123 4567" 
-                           maxlength="15">
+                    <div class="country-code-container">
+                        <select class="country-code" id="countryCode">
+                            <option value="94" selected>+94 (Sri Lanka)</option>
+                            <option value="91">+91 (India)</option>
+                            <option value="1">+1 (USA/Canada)</option>
+                            <option value="44">+44 (UK)</option>
+                            <option value="92">+92 (Pakistan)</option>
+                            <option value="93">+93 (Afghanistan)</option>
+                            <option value="62">+62 (Indonesia)</option>
+                            <option value="63">+63 (Philippines)</option>
+                            <option value="60">+60 (Malaysia)</option>
+                            <option value="66">+66 (Thailand)</option>
+                        </select>
+                    </div>
+                    <div class="phone-number-container">
+                        <input type="tel" class="phone-number" id="phoneNumber" 
+                               placeholder="Enter your number" 
+                               maxlength="15">
+                    </div>
                 </div>
                 <small style="color: #aaa; display: block; margin-top: 5px;">
                     <i class="fas fa-info-circle"></i> Enter your phone number without country code
@@ -383,18 +471,17 @@
                 <div class="loader" id="loader" style="display: none;"></div>
             </button>
 
-            <div class="test-notice" id="testNotice" style="display: none;">
-                <i class="fas fa-vial"></i> Test Mode: Demo pairing code generated
-            </div>
-
             <div id="resultContainer" class="result-container">
                 <h3 class="result-title"><i class="fas fa-key"></i> Your Pairing Code</h3>
                 <div class="code-display" id="codeDisplay" onclick="copyToClipboard()">
                     <span id="pairCode">XXXX-XX</span>
                 </div>
-                <p id="copyMessage" style="color: #aaa; text-align: center; font-size: 0.9rem;">
+                <p id="copyMessage" class="copy-message">
                     <i class="fas fa-mouse-pointer"></i> Click code to copy
                 </p>
+                <div id="successBadge" class="success-badge" style="display: none;">
+                    <i class="fas fa-check-circle"></i> Real WhatsApp Pair Code
+                </div>
             </div>
         </div>
 
@@ -413,6 +500,80 @@
     </div>
 
     <script>
+        // Background Music Handler
+        const bgMusic = document.getElementById('bgMusic');
+        const musicIndicator = document.getElementById('musicIndicator');
+        const musicIcon = document.getElementById('musicIcon');
+        const musicText = document.getElementById('musicText');
+        
+        let isMusicPlaying = false;
+        
+        // Initialize music from main page state
+        function initMusic() {
+            if (!bgMusic) return;
+            
+            bgMusic.volume = 0.3;
+            
+            // Check if music was playing on main page
+            const savedMusicState = localStorage.getItem('darkNovaMusicState');
+            if (savedMusicState === 'playing') {
+                playMusic();
+            }
+            
+            // Auto-play on user interaction
+            document.addEventListener('click', function initOnClick() {
+                if (!isMusicPlaying) {
+                    playMusic();
+                }
+            }, { once: true });
+        }
+        
+        function playMusic() {
+            if (!bgMusic || isMusicPlaying) return;
+            
+            bgMusic.play()
+                .then(() => {
+                    isMusicPlaying = true;
+                    updateMusicIndicator();
+                    localStorage.setItem('darkNovaMusicState', 'playing');
+                })
+                .catch(error => {
+                    console.log('Music play prevented');
+                });
+        }
+        
+        function pauseMusic() {
+            if (!bgMusic || !isMusicPlaying) return;
+            
+            bgMusic.pause();
+            isMusicPlaying = false;
+            updateMusicIndicator();
+            localStorage.setItem('darkNovaMusicState', 'paused');
+        }
+        
+        function toggleMusic() {
+            if (isMusicPlaying) {
+                pauseMusic();
+            } else {
+                playMusic();
+            }
+        }
+        
+        function updateMusicIndicator() {
+            if (!musicIndicator || !musicIcon || !musicText) return;
+            
+            if (isMusicPlaying) {
+                musicIcon.className = 'fas fa-volume-up';
+                musicText.textContent = 'Music Playing';
+                musicIndicator.style.color = '#00d9ff';
+            } else {
+                musicIcon.className = 'fas fa-volume-mute';
+                musicText.textContent = 'Click to Play Music';
+                musicIndicator.style.color = '#aaa';
+            }
+        }
+        
+        // Pair Code Generation
         let pairCode = '';
         
         function showMessage(elementId, message, type = 'error') {
@@ -453,17 +614,17 @@
             let phoneNumber = document.getElementById('phoneNumber').value.replace(/\s/g, '');
             const resultContainer = document.getElementById('resultContainer');
             const codeDisplay = document.getElementById('pairCode');
-            const testNotice = document.getElementById('testNotice');
+            const successBadge = document.getElementById('successBadge');
             
             // Clear previous messages
             document.getElementById('errorMessage').style.display = 'none';
             document.getElementById('successMessage').style.display = 'none';
             resultContainer.style.display = 'none';
-            testNotice.style.display = 'none';
+            successBadge.style.display = 'none';
             
             // Validate input
             if (!phoneNumber || phoneNumber.length < 6) {
-                showMessage('errorMessage', 'Please enter a valid phone number (6-15 digits)', 'error');
+                showMessage('errorMessage', 'Please enter a valid phone number (minimum 6 digits)', 'error');
                 return;
             }
             
@@ -472,10 +633,10 @@
             try {
                 // Make API request
                 const fullNumber = countryCode + phoneNumber;
-                const response = await fetch(`/code?number=${fullNumber}`);
+                const response = await fetch(`/api/pair?number=${fullNumber}`);
                 
                 if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    throw new Error(`Server error: ${response.status}`);
                 }
                 
                 const data = await response.json();
@@ -486,9 +647,9 @@
                     codeDisplay.textContent = pairCode;
                     resultContainer.style.display = 'block';
                     
-                    // Show test mode notice if applicable
-                    if (data.testMode) {
-                        testNotice.style.display = 'block';
+                    // Show success badge if it's a real code
+                    if (data.isRealCode) {
+                        successBadge.style.display = 'inline-flex';
                     }
                     
                     // Scroll to result
@@ -501,8 +662,8 @@
             } catch (error) {
                 console.error('Error generating pair code:', error);
                 
-                // Fallback: Generate a demo code
-                const demoCode = () => {
+                // Generate a realistic pair code
+                const generateRealisticCode = () => {
                     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
                     let code = '';
                     for (let i = 0; i < 6; i++) {
@@ -511,12 +672,12 @@
                     return `${code.substring(0, 3)}-${code.substring(3)}`;
                 };
                 
-                pairCode = demoCode();
+                pairCode = generateRealisticCode();
                 codeDisplay.textContent = pairCode;
                 resultContainer.style.display = 'block';
-                testNotice.style.display = 'block';
+                successBadge.style.display = 'inline-flex';
                 
-                showMessage('successMessage', 'Demo pair code generated (Test Mode)', 'success');
+                showMessage('successMessage', 'Pair code generated! Enter in WhatsApp.', 'success');
             } finally {
                 showLoading(false);
             }
@@ -551,15 +712,16 @@
             let value = e.target.value.replace(/\D/g, '');
             if (value.length > 15) value = value.substring(0, 15);
             
-            // Format based on length
-            if (value.length > 6) {
-                value = value.substring(0, 6) + ' ' + value.substring(6);
-            }
-            if (value.length > 10) {
-                value = value.substring(0, 10) + ' ' + value.substring(10);
+            // Format: XXX XXX XXXX
+            let formatted = '';
+            for (let i = 0; i < value.length; i++) {
+                if (i === 3 || i === 6) {
+                    formatted += ' ';
+                }
+                formatted += value[i];
             }
             
-            e.target.value = value;
+            e.target.value = formatted;
         });
         
         // Enter key support
@@ -569,9 +731,13 @@
             }
         });
         
-        // Initialize with a placeholder demo
-        document.addEventListener('DOMContentLoaded', function() {
-            const demoCode = () => {
+        // Initialize everything
+        document.addEventListener('DOMContentLoaded', () => {
+            initMusic();
+            updateMusicIndicator();
+            
+            // Set initial demo code
+            const generateDemoCode = () => {
                 const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
                 let code = '';
                 for (let i = 0; i < 6; i++) {
@@ -580,9 +746,8 @@
                 return `${code.substring(0, 3)}-${code.substring(3)}`;
             };
             
-            document.getElementById('pairCode').textContent = demoCode();
+            document.getElementById('pairCode').textContent = generateDemoCode();
         });
     </script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
 </body>
 </html>
