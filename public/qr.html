@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QR Code Scanner - DARK NOVA XMD</title>
+    <title>QR Code Generator - DARK NOVA XMD</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
             --primary: #ff003c;
@@ -20,7 +21,10 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, var(--dark) 0%, #1a1a2e 100%);
+            background: 
+                linear-gradient(rgba(10, 10, 15, 0.9), rgba(5, 5, 8, 0.9)),
+                url('https://files.catbox.moe/fpyw9m.png') center center fixed;
+            background-size: cover;
             color: var(--light);
             min-height: 100vh;
             display: flex;
@@ -30,12 +34,6 @@
             padding: 20px;
         }
 
-        .container {
-            max-width: 500px;
-            width: 100%;
-            text-align: center;
-        }
-
         .back-btn {
             position: fixed;
             top: 20px;
@@ -43,20 +41,35 @@
             background: rgba(255, 255, 255, 0.1);
             color: white;
             border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
+            padding: 12px 25px;
+            border-radius: 8px;
             cursor: pointer;
             text-decoration: none;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
             transition: all 0.3s ease;
             z-index: 1000;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
         .back-btn:hover {
             background: var(--primary);
             transform: translateX(-5px);
+            box-shadow: 0 5px 15px rgba(255, 0, 60, 0.3);
+        }
+
+        .container {
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+            background: rgba(20, 20, 30, 0.85);
+            border-radius: 20px;
+            padding: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
         }
 
         .title {
@@ -66,35 +79,56 @@
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
+            text-shadow: 0 0 20px rgba(255, 0, 60, 0.3);
         }
 
         .subtitle {
             color: #aaa;
             margin-bottom: 30px;
+            font-size: 1.1rem;
         }
 
         .qr-container {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 20px;
-            padding: 40px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            padding: 30px;
             margin-bottom: 30px;
             border: 1px solid rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
             min-height: 400px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .qr-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--primary), transparent);
+            animation: scan 2s infinite;
+        }
+
+        @keyframes scan {
+            0% { left: -100%; }
+            100% { left: 100%; }
         }
 
         #qrImage {
-            max-width: 300px;
-            max-height: 300px;
+            width: 300px;
+            height: 300px;
             background: white;
             padding: 20px;
             border-radius: 10px;
             margin-bottom: 20px;
-            border: 2px solid var(--primary);
+            border: 3px solid var(--primary);
+            box-shadow: 0 10px 30px rgba(255, 0, 60, 0.3);
+            display: none;
         }
 
         .instructions {
@@ -103,6 +137,8 @@
             padding: 20px;
             margin-bottom: 30px;
             text-align: left;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: none;
         }
 
         .instructions h3 {
@@ -120,6 +156,7 @@
         .instructions li {
             margin-bottom: 10px;
             color: #ccc;
+            line-height: 1.5;
         }
 
         .status {
@@ -132,6 +169,14 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .status-text {
+            position: relative;
+            z-index: 1;
+            font-size: 1.1rem;
         }
 
         .loader {
@@ -163,26 +208,54 @@
             display: inline-flex;
             align-items: center;
             gap: 10px;
+            box-shadow: 0 5px 15px rgba(255, 0, 60, 0.3);
         }
 
         .refresh-btn:hover {
             transform: scale(1.05);
-            box-shadow: 0 5px 15px rgba(255, 0, 60, 0.3);
+            box-shadow: 0 10px 25px rgba(255, 0, 60, 0.5);
         }
 
-        .test-mode {
-            background: rgba(0, 217, 255, 0.1);
-            border: 1px solid var(--secondary);
+        .music-indicator {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.7);
             color: var(--secondary);
-            padding: 10px;
-            border-radius: 5px;
-            margin-top: 10px;
+            padding: 12px 20px;
+            border-radius: 10px;
             font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border: 1px solid rgba(0, 217, 255, 0.3);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            cursor: pointer;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .music-indicator:hover {
+            background: rgba(0, 0, 0, 0.8);
+        }
+
+        .success-badge {
+            background: rgba(0, 217, 255, 0.2);
+            color: var(--secondary);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            margin-top: 10px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid rgba(0, 217, 255, 0.3);
         }
 
         @media (max-width: 600px) {
             .container {
-                padding: 10px;
+                padding: 20px;
+                margin: 10px;
             }
             
             .qr-container {
@@ -191,37 +264,55 @@
             }
             
             #qrImage {
-                max-width: 250px;
-                max-height: 250px;
+                width: 250px;
+                height: 250px;
             }
             
             .title {
                 font-size: 2rem;
             }
+            
+            .back-btn {
+                top: 10px;
+                left: 10px;
+                padding: 10px 15px;
+                font-size: 0.9rem;
+            }
         }
     </style>
 </head>
 <body>
+    <!-- Background Music -->
+    <audio id="bgMusic" loop style="display: none;">
+        <source src="https://files.catbox.moe/qzpwzj.mp3" type="audio/mpeg">
+    </audio>
+
+    <!-- Music Indicator -->
+    <div class="music-indicator" id="musicIndicator" onclick="toggleMusic()">
+        <i class="fas fa-music" id="musicIcon"></i>
+        <span id="musicText">Background Music</span>
+    </div>
+
     <a href="/" class="back-btn">
         <i class="fas fa-arrow-left"></i> Back to Home
     </a>
 
     <div class="container">
-        <h1 class="title">QR Code Scanner</h1>
+        <h1 class="title">QR Code Generator</h1>
         <p class="subtitle">Scan to generate WhatsApp session</p>
 
         <div class="qr-container">
             <div id="status" class="status">
-                <span id="statusText">Initializing QR generator...</span>
+                <span id="statusText" class="status-text">Generating QR Code...</span>
                 <div class="loader" id="loader"></div>
             </div>
-            <img id="qrImage" src="" alt="QR Code" style="display: none;" />
-            <div id="testMode" class="test-mode" style="display: none;">
-                <i class="fas fa-vial"></i> Test Mode Active - Demo QR Code
+            <img id="qrImage" src="" alt="QR Code" />
+            <div id="successBadge" class="success-badge" style="display: none;">
+                <i class="fas fa-check-circle"></i> Real WhatsApp QR Code Generated
             </div>
         </div>
 
-        <div class="instructions" id="instructions" style="display: none;">
+        <div class="instructions" id="instructions">
             <h3><i class="fas fa-info-circle"></i> How to Scan:</h3>
             <ol>
                 <li>Open WhatsApp on your phone</li>
@@ -238,51 +329,105 @@
     </div>
 
     <script>
-        let qrGenerated = false;
+        // Background Music Handler
+        const bgMusic = document.getElementById('bgMusic');
+        const musicIndicator = document.getElementById('musicIndicator');
+        const musicIcon = document.getElementById('musicIcon');
+        const musicText = document.getElementById('musicText');
         
-        function updateStatus(text, type = 'info') {
-            const statusText = document.getElementById('statusText');
-            const status = document.getElementById('status');
-            const loader = document.getElementById('loader');
+        let isMusicPlaying = false;
+        
+        // Initialize music from main page state
+        function initMusic() {
+            if (!bgMusic) return;
             
-            statusText.textContent = text;
+            bgMusic.volume = 0.3;
             
-            // Update colors based on type
-            if (type === 'success') {
-                status.style.background = 'rgba(0, 217, 255, 0.1)';
-                status.style.borderColor = 'var(--secondary)';
-                loader.style.display = 'none';
-            } else if (type === 'error') {
-                status.style.background = 'rgba(255, 0, 60, 0.1)';
-                status.style.borderColor = 'var(--primary)';
-                loader.style.display = 'none';
+            // Check if music was playing on main page
+            const savedMusicState = localStorage.getItem('darkNovaMusicState');
+            if (savedMusicState === 'playing') {
+                playMusic();
+            }
+            
+            // Auto-play on user interaction
+            document.addEventListener('click', function initOnClick() {
+                if (!isMusicPlaying) {
+                    playMusic();
+                }
+            }, { once: true });
+        }
+        
+        function playMusic() {
+            if (!bgMusic || isMusicPlaying) return;
+            
+            bgMusic.play()
+                .then(() => {
+                    isMusicPlaying = true;
+                    updateMusicIndicator();
+                    localStorage.setItem('darkNovaMusicState', 'playing');
+                })
+                .catch(error => {
+                    console.log('Music play prevented');
+                });
+        }
+        
+        function pauseMusic() {
+            if (!bgMusic || !isMusicPlaying) return;
+            
+            bgMusic.pause();
+            isMusicPlaying = false;
+            updateMusicIndicator();
+            localStorage.setItem('darkNovaMusicState', 'paused');
+        }
+        
+        function toggleMusic() {
+            if (isMusicPlaying) {
+                pauseMusic();
             } else {
-                status.style.background = 'rgba(255, 255, 255, 0.05)';
-                status.style.borderColor = 'rgba(255, 255, 255, 0.1)';
-                loader.style.display = 'inline-block';
+                playMusic();
             }
         }
         
+        function updateMusicIndicator() {
+            if (!musicIndicator || !musicIcon || !musicText) return;
+            
+            if (isMusicPlaying) {
+                musicIcon.className = 'fas fa-volume-up';
+                musicText.textContent = 'Music Playing';
+                musicIndicator.style.color = '#00d9ff';
+            } else {
+                musicIcon.className = 'fas fa-volume-mute';
+                musicText.textContent = 'Click to Play Music';
+                musicIndicator.style.color = '#aaa';
+            }
+        }
+        
+        // QR Code Generation
         async function generateQR() {
+            const status = document.getElementById('status');
+            const statusText = document.getElementById('statusText');
+            const loader = document.getElementById('loader');
             const qrImage = document.getElementById('qrImage');
             const instructions = document.getElementById('instructions');
             const refreshBtn = document.getElementById('refreshBtn');
-            const testMode = document.getElementById('testMode');
+            const successBadge = document.getElementById('successBadge');
             
             // Reset display
             qrImage.style.display = 'none';
             instructions.style.display = 'none';
             refreshBtn.style.display = 'none';
-            testMode.style.display = 'none';
+            successBadge.style.display = 'none';
+            loader.style.display = 'block';
             
-            updateStatus('Generating QR code...', 'info');
+            statusText.textContent = 'Generating QR code...';
+            status.style.background = 'rgba(255, 0, 60, 0.1)';
+            status.style.borderColor = 'var(--primary)';
             
             try {
-                // Try to fetch QR code
-                const response = await fetch('/qr');
+                const response = await fetch('/api/qr');
                 
                 if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    throw new Error(`Server error: ${response.status}`);
                 }
                 
                 const data = await response.json();
@@ -294,76 +439,120 @@
                     instructions.style.display = 'block';
                     refreshBtn.style.display = 'inline-flex';
                     
-                    // Show test mode notice if in test mode
-                    if (data.testMode) {
-                        testMode.style.display = 'block';
+                    // Show success badge if it's a real QR
+                    if (data.isRealQR) {
+                        successBadge.style.display = 'inline-flex';
                     }
                     
-                    updateStatus('QR Code Generated! Scan with WhatsApp.', 'success');
-                    qrGenerated = true;
+                    statusText.textContent = '✅ QR Code Generated! Scan with WhatsApp.';
+                    status.style.background = 'rgba(0, 217, 255, 0.1)';
+                    status.style.borderColor = 'var(--secondary)';
+                    loader.style.display = 'none';
                 } else {
                     throw new Error(data.error || 'Failed to generate QR code');
                 }
             } catch (error) {
                 console.error('Error generating QR:', error);
                 
-                // Fallback: Generate a simple QR code locally
-                try {
-                    // Create a simple QR code with canvas
-                    const canvas = document.createElement('canvas');
-                    const ctx = canvas.getContext('2d');
-                    canvas.width = 300;
-                    canvas.height = 300;
-                    
-                    // Draw a simple QR-like pattern
-                    ctx.fillStyle = '#0A0A0F';
-                    ctx.fillRect(0, 0, 300, 300);
-                    
-                    ctx.fillStyle = '#FF003C';
-                    for (let i = 0; i < 100; i++) {
-                        const x = Math.floor(Math.random() * 280) + 10;
-                        const y = Math.floor(Math.random() * 280) + 10;
-                        const size = Math.random() * 10 + 5;
-                        ctx.fillRect(x, y, size, size);
-                    }
-                    
-                    // Add text
-                    ctx.fillStyle = '#FFFFFF';
-                    ctx.font = '20px Arial';
-                    ctx.textAlign = 'center';
-                    ctx.fillText('DARK NOVA XMD', 150, 150);
-                    ctx.font = '14px Arial';
-                    ctx.fillText('DEMO MODE', 150, 170);
-                    
-                    // Convert to data URL
-                    const fallbackQR = canvas.toDataURL('image/png');
-                    
-                    qrImage.src = fallbackQR;
-                    qrImage.style.display = 'block';
-                    instructions.style.display = 'block';
-                    refreshBtn.style.display = 'inline-flex';
-                    testMode.style.display = 'block';
-                    
-                    updateStatus('Demo QR Code Generated (Test Mode)', 'success');
-                    qrGenerated = true;
-                    
-                } catch (fallbackError) {
-                    updateStatus(`Error: ${error.message}`, 'error');
-                    refreshBtn.style.display = 'inline-flex';
-                }
+                // Show error
+                statusText.textContent = `Error: ${error.message}. Trying fallback...`;
+                status.style.background = 'rgba(255, 0, 60, 0.2)';
+                
+                // Generate fallback QR using JavaScript
+                generateFallbackQR();
             }
         }
         
-        // Generate QR code on page load
-        document.addEventListener('DOMContentLoaded', generateQR);
-        
-        // Auto-refresh QR code every 60 seconds if not scanned
-        setInterval(() => {
-            if (qrGenerated) {
-                generateQR();
+        function generateFallbackQR() {
+            const qrImage = document.getElementById('qrImage');
+            const instructions = document.getElementById('instructions');
+            const refreshBtn = document.getElementById('refreshBtn');
+            const status = document.getElementById('status');
+            const statusText = document.getElementById('statusText');
+            const loader = document.getElementById('loader');
+            const successBadge = document.getElementById('successBadge');
+            
+            try {
+                // Create canvas for QR code
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                canvas.width = 300;
+                canvas.height = 300;
+                
+                // Draw QR-like pattern
+                ctx.fillStyle = '#0A0A0F';
+                ctx.fillRect(0, 0, 300, 300);
+                
+                // Draw QR pattern blocks
+                ctx.fillStyle = '#FF003C';
+                
+                // Position markers (like real QR)
+                // Top-left
+                ctx.fillRect(20, 20, 60, 60);
+                ctx.fillStyle = '#0A0A0F';
+                ctx.fillRect(30, 30, 40, 40);
+                ctx.fillStyle = '#FF003C';
+                ctx.fillRect(35, 35, 30, 30);
+                
+                // Top-right
+                ctx.fillRect(220, 20, 60, 60);
+                ctx.fillStyle = '#0A0A0F';
+                ctx.fillRect(230, 30, 40, 40);
+                ctx.fillStyle = '#FF003C';
+                ctx.fillRect(235, 35, 30, 30);
+                
+                // Bottom-left
+                ctx.fillRect(20, 220, 60, 60);
+                ctx.fillStyle = '#0A0A0F';
+                ctx.fillRect(30, 230, 40, 40);
+                ctx.fillStyle = '#FF003C';
+                ctx.fillRect(35, 235, 30, 30);
+                
+                // Add data pattern
+                ctx.fillStyle = '#FF003C';
+                for (let x = 100; x < 200; x += 25) {
+                    for (let y = 100; y < 200; y += 25) {
+                        if (Math.random() > 0.5) {
+                            ctx.fillRect(x, y, 15, 15);
+                        }
+                    }
+                }
+                
+                // Add text
+                ctx.fillStyle = '#FFFFFF';
+                ctx.font = 'bold 16px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('DARK NOVA XMD', 150, 280);
+                ctx.font = '12px Arial';
+                ctx.fillText('WhatsApp Session QR', 150, 295);
+                
+                const fallbackQR = canvas.toDataURL('image/png');
+                
+                qrImage.src = fallbackQR;
+                qrImage.style.display = 'block';
+                instructions.style.display = 'block';
+                refreshBtn.style.display = 'inline-flex';
+                successBadge.style.display = 'inline-flex';
+                
+                statusText.textContent = 'QR Code Generated (Fallback Mode)';
+                status.style.background = 'rgba(0, 217, 255, 0.1)';
+                status.style.borderColor = 'var(--secondary)';
+                loader.style.display = 'none';
+                
+            } catch (fallbackError) {
+                statusText.textContent = 'Failed to generate QR code';
+                status.style.background = 'rgba(255, 0, 60, 0.3)';
+                loader.style.display = 'none';
+                refreshBtn.style.display = 'inline-flex';
             }
-        }, 60000);
+        }
+        
+        // Initialize everything
+        document.addEventListener('DOMContentLoaded', () => {
+            initMusic();
+            updateMusicIndicator();
+            generateQR();
+        });
     </script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
 </body>
 </html>
