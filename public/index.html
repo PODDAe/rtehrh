@@ -150,6 +150,7 @@
             cursor: pointer;
             position: relative;
             overflow: hidden;
+            margin: 5px;
         }
 
         .btn::after {
@@ -175,6 +176,14 @@
 
         .btn.qr {
             background: linear-gradient(45deg, #00d9ff, #0099ff);
+        }
+
+        .btn.github {
+            background: linear-gradient(45deg, #333, #666);
+        }
+
+        .btn.copy {
+            background: linear-gradient(45deg, #6a11cb, #2575fc);
         }
 
         .status-panel {
@@ -228,6 +237,58 @@
 
         .warning {
             color: #ffaa00 !important;
+        }
+
+        .workflow-section {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 30px;
+            border-left: 4px solid #6a11cb;
+        }
+
+        .workflow-code {
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+        }
+
+        .workflow-code pre {
+            margin: 0;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .copy-btn-container {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+
+        .copy-notification {
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            background: rgba(0, 255, 136, 0.9);
+            color: #000;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-weight: bold;
+            z-index: 1001;
+            animation: fadeOut 2s forwards 1s;
+            display: none;
+        }
+
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
         }
 
         footer {
@@ -308,6 +369,11 @@
                 text-align: center;
                 justify-content: center;
             }
+            
+            .workflow-code {
+                font-size: 0.8rem;
+                padding: 15px;
+            }
         }
     </style>
 </head>
@@ -321,6 +387,11 @@
     <div class="music-indicator" id="musicIndicator">
         <i class="fas fa-music"></i>
         <span>Background Music Playing</span>
+    </div>
+
+    <!-- Copy Notification -->
+    <div class="copy-notification" id="copyNotification">
+        <i class="fas fa-check-circle"></i> Copied to clipboard!
     </div>
 
     <div class="container">
@@ -380,12 +451,74 @@
             </div>
         </div>
 
+        <div class="workflow-section">
+            <h3 class="status-title">
+                <i class="fab fa-github"></i> GitHub CI/CD Workflow
+            </h3>
+            <p style="color: #ccc; margin-bottom: 20px;">Use this workflow to automate deployment of DARK NOVA XMD to your own GitHub repository:</p>
+            
+            <div class="workflow-code">
+                <div class="copy-btn-container">
+                    <button class="btn copy" onclick="copyWorkflowCode()">
+                        <i class="fas fa-copy"></i> Copy Workflow
+                    </button>
+                </div>
+                <pre id="workflowCode">name: Node.js CI/CD Workflow
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [20.x]
+        
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Start application
+      run: npm start</pre>
+            </div>
+            
+            <p style="color: #aaa; font-size: 0.9rem; margin-top: 20px;">
+                <i class="fas fa-info-circle"></i> Save this as <code>.github/workflows/deploy.yml</code> in your repository root
+            </p>
+            
+            <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-top: 20px;">
+                <a href="https://github.com/new" target="_blank" class="btn github">
+                    <i class="fab fa-github"></i> Create New Repo
+                </a>
+                <a href="https://github.com/alpha-x-team-ofc/DTZ-NOVA-X-MD-V.1/fork" target="_blank" class="btn github">
+                    <i class="fas fa-code-branch"></i> Fork Repository
+                </a>
+                <a href="https://docs.github.com/en/actions" target="_blank" class="btn">
+                    <i class="fas fa-book"></i> GitHub Actions Docs
+                </a>
+            </div>
+        </div>
+
         <footer>
             <div class="footer-links">
-                <a href="https://github.com/dula9x/DARK-NOVA-XMD" target="_blank">
+                <a href="https://github.com/alpha-x-team-ofc/DTZ-NOVA-X-MD-V.1" target="_blank">
                     <i class="fab fa-github"></i> GitHub
                 </a>
-                <a href="https://whatsapp.com/channel/0029Vb9yA9K9sBI799oc7U2T" target="_blank">
+                <a href="https://whatsapp.com/channel/0029Vb6mfVdEAKWH5Sgs9y2L" target="_blank">
                     <i class="fab fa-whatsapp"></i> WhatsApp Channel
                 </a>
                 <a href="https://render.com" target="_blank">
@@ -395,7 +528,7 @@
                     <i class="fas fa-heartbeat"></i> Health Check
                 </a>
             </div>
-            <p>© 2024 DARK NOVA XMD | Created by Dulina Nethmira</p>
+            <p>© 2025 DARK NOVA XMD | Created by Dulina Nethmira</p>
             <p>Powered by DTZ TEAM</p>
         </footer>
     </div>
@@ -440,6 +573,21 @@
                 document.getElementById('megaStatus').textContent = 'Unknown';
                 document.getElementById('megaStatus').className = 'status-value warning';
             }
+        }
+        
+        // Copy workflow code function
+        function copyWorkflowCode() {
+            const workflowCode = document.getElementById('workflowCode').textContent;
+            navigator.clipboard.writeText(workflowCode).then(() => {
+                const notification = document.getElementById('copyNotification');
+                notification.style.display = 'block';
+                setTimeout(() => {
+                    notification.style.display = 'none';
+                }, 3000);
+            }).catch(err => {
+                console.error('Failed to copy: ', err);
+                alert('Failed to copy workflow code. Please copy manually.');
+            });
         }
         
         // Initial status check
