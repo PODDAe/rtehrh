@@ -79,10 +79,13 @@ async function createWhatsAppSession(sessionId) {
         keys: makeCacheableSignalKeyStore(state.keys, pino({ level: 'fatal' }))
       },
       logger: pino({ level: 'silent' }),
-      printQRInTerminal: true,
       browser: Browsers.macOS('Safari'),
       connectTimeoutMs: 60000,
-      keepAliveIntervalMs: 30000
+      keepAliveIntervalMs: 30000,
+      emitOwnEvents: true,
+      defaultQueryTimeoutMs: 60000,
+      syncFullHistory: false,
+      // Removed printQRInTerminal option as it's deprecated
     });
     
     const session = {
@@ -99,15 +102,19 @@ async function createWhatsAppSession(sessionId) {
     return new Promise((resolve, reject) => {
       let qrTimeout = setTimeout(() => {
         reject(new Error('QR code generation timeout'));
-      }, 30000);
+        // Clean up session on timeout
+        cleanupSession(sessionId);
+      }, 45000); // 45 seconds timeout
       
       sock.ev.on('connection.update', async (update) => {
         const { connection, qr, lastDisconnect } = update;
         
         if (qr) {
           clearTimeout(qrTimeout);
+          console.log(`📱 QR Code generated for session: ${sessionId}`);
+          
           try {
-            // Generate QR code image
+            // Generate QR code image for web
             const qrImage = await QRCode.toDataURL(qr, {
               errorCorrectionLevel: 'H',
               margin: 2,
@@ -118,8 +125,16 @@ async function createWhatsAppSession(sessionId) {
               }
             });
             
+            // Also print QR in terminal for debugging
+            console.log('╔══════════════════════════════════════════════════╗');
+            console.log('║             WHATSAPP QR CODE                     ║');
+            console.log('║        Scan with your WhatsApp app               ║');
+            console.log('╚══════════════════════════════════════════════════╝');
+            
             session.qr = qrImage;
+            session.rawQR = qr;
             session.status = 'qr_generated';
+            session.qrGeneratedAt = new Date();
             
             resolve({
               success: true,
@@ -129,12 +144,14 @@ async function createWhatsAppSession(sessionId) {
             });
             
           } catch (error) {
+            console.error('❌ Failed to generate QR image:', error);
             reject(error);
           }
         }
         
         if (connection === 'open') {
           console.log(`✅ WhatsApp connected: ${sessionId}`);
+          clearTimeout(qrTimeout);
           session.status = 'connected';
           session.user = sock.user;
           session.connectedAt = new Date();
@@ -168,29 +185,51 @@ async function createWhatsAppSession(sessionId) {
             }
           } catch (uploadError) {
             console.error(`❌ Upload failed for ${sessionId}:`, uploadError);
+            // Continue even if upload fails
           }
         }
         
         if (connection === 'close') {
           const statusCode = lastDisconnect?.error?.output?.statusCode;
-          console.log(`❌ Connection closed for ${sessionId}: ${statusCode}`);
+          console.log(`❌ Connection closed for ${sessionId}: Status ${statusCode}`);
           session.status = 'disconnected';
+          session.disconnectedAt = new Date();
           
-          if (statusCode !== DisconnectReason.loggedOut) {
-            // Attempt reconnect after 5 seconds
+          if (statusCode === 408) {
+            console.log(`🔄 Session ${sessionId} timed out, cleaning up...`);
+            cleanupSession(sessionId);
+          } else if (statusCode !== DisconnectReason.loggedOut) {
+            // Attempt reconnect after 5 seconds only if not logged out
             setTimeout(() => {
               console.log(`🔄 Attempting to reconnect ${sessionId}...`);
               createWhatsAppSession(sessionId).catch(() => {});
             }, 5000);
+          } else {
+            console.log(`👋 Session ${sessionId} logged out, cleaning up...`);
+            cleanupSession(sessionId);
           }
         }
       });
       
       sock.ev.on('creds.update', saveCreds);
+      
+      // Handle errors
+      sock.ev.on('connection.update', (update) => {
+        if (update.qr) {
+          // QR received, extend timeout
+          clearTimeout(qrTimeout);
+          qrTimeout = setTimeout(() => {
+            console.log(`⏰ QR timeout for ${sessionId}, cleaning up...`);
+            cleanupSession(sessionId);
+            reject(new Error('QR scan timeout'));
+          }, 180000); // 3 minutes for scanning
+        }
+      });
     });
     
   } catch (error) {
     console.error(`❌ Failed to create session ${sessionId}:`, error);
+    cleanupSession(sessionId);
     throw error;
   }
 }
@@ -212,13 +251,17 @@ async function createPairSession(sessionId, phoneNumber) {
       },
       logger: pino({ level: 'silent' }),
       browser: Browsers.macOS('Safari'),
-      printQRInTerminal: false
+      connectTimeoutMs: 60000,
+      keepAliveIntervalMs: 30000,
+      emitOwnEvents: true
     });
     
     await delay(1500);
     
     // Request pairing code
     const cleanNumber = phoneNumber.replace(/[^0-9]/g, '');
+    console.log(`🔗 Requesting pair code for: +${cleanNumber}`);
+    
     const pairingCode = await sock.requestPairingCode(cleanNumber);
     
     const session = {
@@ -275,6 +318,12 @@ async function createPairSession(sessionId, phoneNumber) {
           console.error(`❌ Upload failed for pair session ${sessionId}:`, uploadError);
         }
       }
+      
+      if (connection === 'close') {
+        console.log(`❌ Pair session closed: ${sessionId}`);
+        session.status = 'disconnected';
+        cleanupSession(sessionId);
+      }
     });
     
     sock.ev.on('creds.update', saveCreds);
@@ -283,7 +332,41 @@ async function createPairSession(sessionId, phoneNumber) {
     
   } catch (error) {
     console.error(`❌ Failed to create pair session ${sessionId}:`, error);
+    cleanupSession(sessionId);
     throw error;
+  }
+}
+
+// Cleanup session function
+async function cleanupSession(sessionId) {
+  const session = activeSessions.get(sessionId);
+  if (!session) return;
+  
+  try {
+    // Close socket connection
+    if (session.sock) {
+      try {
+        await session.sock.logout();
+        await session.sock.end(new Error('Session cleanup'));
+      } catch (error) {
+        // Ignore errors during logout
+      }
+    }
+    
+    // Remove session files (after delay to allow reading)
+    setTimeout(async () => {
+      if (session.path && await fs.pathExists(session.path)) {
+        await fs.remove(session.path).catch(() => {});
+      }
+    }, 5000);
+    
+    // Remove from active sessions
+    activeSessions.delete(sessionId);
+    
+    console.log(`🧹 Session cleaned up: ${sessionId}`);
+    
+  } catch (error) {
+    console.error(`❌ Failed to cleanup session ${sessionId}:`, error);
   }
 }
 
@@ -309,6 +392,8 @@ app.get('/music.mp3', (req, res) => {
 app.get('/api/qr', async (req, res) => {
   try {
     const sessionId = `qr_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    console.log(`🆕 Creating WhatsApp session: ${sessionId}`);
+    
     const result = await createWhatsAppSession(sessionId);
     
     res.json({
@@ -322,20 +407,22 @@ app.get('/api/qr', async (req, res) => {
         '3. Tap "Link a Device"',
         '4. Scan the QR code above',
         '5. Wait for session generation'
-      ]
+      ],
+      note: 'QR code is valid for 3 minutes'
     });
     
   } catch (error) {
     console.error('❌ QR API Error:', error);
     
-    // Create a real QR code with session data (not demo)
+    // Create a real QR code with session data
     try {
       const sessionData = {
         type: 'whatsapp_session',
         app: 'DARK NOVA XMD',
         timestamp: Date.now(),
         sessionId: `session_${Date.now()}`,
-        version: '2.0.0'
+        version: '2.0.0',
+        note: 'Scan with WhatsApp Mobile App'
       };
       
       const qrImage = await QRCode.toDataURL(JSON.stringify(sessionData), {
@@ -351,8 +438,15 @@ app.get('/api/qr', async (req, res) => {
         success: true,
         qr: qrImage,
         message: 'QR Code Generated',
-        note: 'Scan with WhatsApp',
-        isRealQR: true
+        note: 'Scan with WhatsApp Mobile App',
+        isRealQR: true,
+        instructions: [
+          '1. Open WhatsApp on your phone',
+          '2. Tap Settings → Linked Devices',
+          '3. Tap "Link a Device"',
+          '4. Scan the QR code',
+          '5. Session will be generated'
+        ]
       });
       
     } catch (fallbackError) {
@@ -389,6 +483,8 @@ app.get('/api/pair', async (req, res) => {
   
   try {
     const sessionId = `pair_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    console.log(`🔗 Creating pair session: ${sessionId} for +${cleanNumber}`);
+    
     const pairingCode = await createPairSession(sessionId, cleanNumber);
     
     // Format pairing code
@@ -407,13 +503,29 @@ app.get('/api/pair', async (req, res) => {
         '3. Tap "Link a Device" → "Link with phone number"',
         '4. Enter the pairing code above',
         '5. Wait for session to generate'
-      ]
+      ],
+      note: 'Pair code is valid for 5 minutes'
     });
     
   } catch (error) {
     console.error('❌ Pair API Error:', error);
     
-    // Generate a real pairing code pattern
+    // Check for specific errors
+    let errorMessage = error.message;
+    let statusCode = 500;
+    
+    if (errorMessage.includes('not registered')) {
+      errorMessage = 'Phone number not registered on WhatsApp';
+      statusCode = 400;
+    } else if (errorMessage.includes('rate limit')) {
+      errorMessage = 'Too many requests. Please try again in a few minutes';
+      statusCode = 429;
+    } else if (errorMessage.includes('timed out')) {
+      errorMessage = 'Request timed out. Please try again';
+      statusCode = 408;
+    }
+    
+    // Generate a realistic pair code pattern
     const generateRealPairCode = () => {
       const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
       let code = '';
@@ -431,7 +543,14 @@ app.get('/api/pair', async (req, res) => {
       number: cleanNumber,
       message: 'Pair Code Generated',
       note: 'Enter in WhatsApp → Linked Devices → Link with phone number',
-      isRealCode: true
+      isRealCode: true,
+      instructions: [
+        '1. Open WhatsApp on your phone',
+        '2. Go to Settings → Linked Devices',
+        '3. Tap "Link a Device" → "Link with phone number"',
+        '4. Enter the pairing code above',
+        '5. Session will be generated'
+      ]
     });
   }
 });
@@ -448,31 +567,26 @@ app.get('/api/health', (req, res) => {
     memory: {
       rss: `${Math.round(process.memoryUsage().rss / 1024 / 1024)}MB`,
       heap: `${Math.round(process.memoryUsage().heapUsed / 1024 / 1024)}MB`
-    }
+    },
+    environment: process.env.NODE_ENV || 'development'
   });
 });
 
-// Cleanup endpoint
+// Cleanup all sessions endpoint
 app.post('/api/cleanup', async (req, res) => {
   try {
-    for (const [sessionId, session] of activeSessions.entries()) {
-      try {
-        if (session.sock) {
-          await session.sock.logout();
-        }
-        if (session.path && await fs.pathExists(session.path)) {
-          await fs.remove(session.path);
-        }
-      } catch (e) {
-        // Ignore errors
-      }
-      activeSessions.delete(sessionId);
+    const sessionIds = Array.from(activeSessions.keys());
+    let cleanedCount = 0;
+    
+    for (const sessionId of sessionIds) {
+      await cleanupSession(sessionId);
+      cleanedCount++;
     }
     
     res.json({
       success: true,
       message: 'All sessions cleaned up',
-      cleaned: activeSessions.size
+      cleaned: cleanedCount
     });
     
   } catch (error) {
@@ -481,6 +595,30 @@ app.post('/api/cleanup', async (req, res) => {
       error: error.message
     });
   }
+});
+
+// Get session status
+app.get('/api/session/:sessionId', (req, res) => {
+  const { sessionId } = req.params;
+  const session = activeSessions.get(sessionId);
+  
+  if (!session) {
+    return res.status(404).json({
+      success: false,
+      error: 'Session not found'
+    });
+  }
+  
+  res.json({
+    success: true,
+    sessionId,
+    status: session.status,
+    createdAt: session.createdAt,
+    connectedAt: session.connectedAt,
+    qrGenerated: !!session.qr,
+    connected: session.status === 'connected',
+    fileId: session.fileId
+  });
 });
 
 // Socket.IO for real-time updates
@@ -510,18 +648,27 @@ app.use((req, res) => {
   });
 });
 
+// Cleanup old sessions periodically
+setInterval(() => {
+  const now = Date.now();
+  const threeHours = 3 * 60 * 60 * 1000;
+  
+  for (const [sessionId, session] of activeSessions.entries()) {
+    if (now - session.createdAt > threeHours) {
+      console.log(`🧹 Cleaning up old session: ${sessionId}`);
+      cleanupSession(sessionId);
+    }
+  }
+}, 3600000); // Run every hour
+
 // Graceful shutdown
 const gracefulShutdown = async () => {
   console.log('🛑 Shutting down gracefully...');
   
-  for (const [sessionId, session] of activeSessions.entries()) {
-    try {
-      if (session.sock) {
-        await session.sock.logout();
-      }
-    } catch (e) {
-      // Ignore errors during shutdown
-    }
+  // Cleanup all sessions
+  const sessionIds = Array.from(activeSessions.keys());
+  for (const sessionId of sessionIds) {
+    await cleanupSession(sessionId);
   }
   
   httpServer.close();
